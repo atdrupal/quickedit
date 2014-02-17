@@ -27,6 +27,10 @@
  *
  * @see Drupal 8's \Drupal\edit\Annotation\InPlaceEditor
  * @see Drupal 8's \Drupal\edit\Plugin\InPlaceEditorBase
+ *
+ * @see InPlaceEditors/CKEditor.php
+ * @see InPlaceEditors/formEditor.php
+ * @see InPlaceEditors/plainTextEditor.php
  */
 function hook_edit_editor_info() {
   $path = drupal_get_path('module', 'edit') . '/InPlaceEditors';
