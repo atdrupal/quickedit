@@ -118,6 +118,13 @@ function edit_requirements($phase) {
       $node_id = $node_ids[0];
       $response = drupal_http_request(url('node/' . $node_id, array('absolute' => TRUE)));
 
+      // Prevent false negatives for the theme compatibility check.
+      if (isset($response->error) && $response->error) {
+        $requirements['edit_theme']['value'] = '<strong>' . t('Could not determine compatibility.') . '</strong>';
+        $requirements['edit_theme']['description'] = t('When a site does not allow anonymous users to access content, requires HTTP authentication or something similar, Edit module is unable to automatically determine compatibility');
+        return $requirements;
+      }
+
       $dom = new \DOMDocument();
       @$dom->loadHTML($response->data);
       $xpath = new \DOMXPath($dom);
