@@ -669,7 +669,7 @@ function edit_library_alter(&$libraries, $module) {
 function edit_field_formatter_info_alter(&$info) {
   foreach ($info as $key => $settings) {
     // Set in-place editor to 'form' if none is supplied.
-    if (empty($settings['edit'])) {
+    if (empty($settings['settings']['edit'])) {
       $info[$key]['settings']['edit'] = array('editor' => 'form');
     }
   }
