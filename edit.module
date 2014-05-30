@@ -202,6 +202,7 @@ function edit_library() {
     ),
     'dependencies' => array(
       array('system', 'jquery'),
+      array('system', 'jquery.once'),
       array('edit', 'underscore'),
       array('edit', 'backbone'),
       array('system', 'jquery.form'),
