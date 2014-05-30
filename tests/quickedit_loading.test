@@ -323,6 +323,11 @@ class QuickEditLoadingTest extends DrupalWebTestCase {
     $this->drupalLogin($this->editor_user);
     $this->drupalGet('node/1');
 
+    // Ensure that the full page title is actually in-place editable
+    $node = node_load(1);
+    $elements = $this->xpath('//h1/div[@data-quickedit-field-id="node/1/title/und/full" and normalize-space(text())=:title]', array(':title' => $node->title));
+    $this->assertTrue(!empty($elements), 'Title with data-quickedit-field-id attribute found.');
+
     // Retrieving the metadata should result in a 200 JSON response.
     $htmlPageDrupalSettings = $this->drupalSettings;
     $post = array('fields[0]' => 'node/1/title/und/full');
