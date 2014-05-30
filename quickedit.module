@@ -879,6 +879,15 @@ function quickedit_libraries_info() {
 }
 
 /**
+ * Implement hook_libraries_info_alter().
+ */
+function quickedit_libraries_info_alter(&$info) {
+  // underscore.module also declares library information for the underscore
+  // library, but does not include the 'variant order' key.
+  $info['underscore']['variant order'] = array('minified', 'source');
+}
+
+/**
  * Generates an identifier to store an entity in TempStore while editing.
  *
  * Must be user-specific.
