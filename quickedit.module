@@ -17,6 +17,9 @@ module_load_include('inc', 'quickedit', 'includes/filter');
 // Load node module "extra fields" support.
 module_load_include('inc', 'quickedit', 'includes/node');
 
+// Load Panelizer support.
+module_load_include('inc', 'quickedit', 'includes/panelizer');
+
 /**
  * Implements hook_menu().
  */
@@ -92,6 +95,17 @@ function quickedit_page_build(&$page) {
   // In-place editing is only supported on the front-end.
   if (path_is_admin(current_path())) {
     return;
+  }
+
+  // Incredibly ugly hack to support Panelizer overrides using Page Manager.
+  // @see includes/panelizer.inc/quickedit_ctools_render_alter()
+  global $quickedit_workaround_for_fundamentally_broken_page_manager;
+  if ($quickedit_workaround_for_fundamentally_broken_page_manager) {
+    // Change from
+    //   <div class="contextual-links-wrapper">
+    // to
+    //   <div class="contextual-links-wrapper" data-quickedit-is-contextual-region-for-entity>
+    $page['content']['system_main']['#attributes']['data-quickedit-is-contextual-region-for-entity'] = '';
   }
 
   // Abuse the 'page_top' region for attaching our libraries.
@@ -363,7 +377,10 @@ function quickedit_preprocess_field(&$variables) {
   // mode).
   // @see field_view_field()
   // @see https://drupal.org/node/2120335
-  if ($element['#view_mode'] === '_custom_display') {
+  // However, we do support Panelizer, and Panelizer always uses a custom view
+  // mode when rendering field panes, in all of its own "view modes".
+  // @see includes/panelizer.inc
+  if ($element['#view_mode'] === '_custom_display' && !isset($element['#object']->panelizer)) {
     return;
   }
 
@@ -406,6 +423,12 @@ function quickedit_preprocess_field(&$variables) {
     if (isset($host_entity->value()->entity_view_prepared)) {
       return;
     }
+  }
+
+  // Panelizer support; see explanation at the top of this function.
+  // @see includes/panelizer.inc
+  if ($element['#view_mode'] === '_custom_display' && isset($element['#object']->panelizer)) {
+    $view_mode = _panelizer_generate_quickedit_viewmode($element['#object']);
   }
 
   // Provide metadata through data- attributes.
