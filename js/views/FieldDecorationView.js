@@ -7,16 +7,16 @@
 
   "use strict";
 
-  Drupal.edit.FieldDecorationView = Backbone.View.extend({
+  Drupal.quickedit.FieldDecorationView = Backbone.View.extend({
 
     _widthAttributeIsEmpty: null,
 
     events: {
-      'mouseenter.edit' : 'onMouseEnter',
-      'mouseleave.edit' : 'onMouseLeave',
+      'mouseenter.quickedit' : 'onMouseEnter',
+      'mouseleave.quickedit' : 'onMouseLeave',
       'click': 'onClick',
-      'tabIn.edit': 'onMouseEnter',
-      'tabOut.edit': 'onMouseLeave'
+      'tabIn.quickedit': 'onMouseEnter',
+      'tabOut.quickedit': 'onMouseLeave'
     },
 
     /**
@@ -24,7 +24,7 @@
      *
      * @param Object options
      *   An object with the following keys:
-     *   - Drupal.edit.EditorView editorView: the editor object view.
+     *   - Drupal.quickedit.EditorView editorView: the editor object view.
      */
     initialize: function (options) {
       this.editorView = options.editorView;
@@ -46,9 +46,10 @@
     /**
      * Determines the actions to take given a change of state.
      *
-     * @param Drupal.edit.FieldModel model
+     * @param Drupal.quickedit.FieldModel model
      * @param String state
-     *   The state of the associated field. One of Drupal.edit.FieldModel.states.
+     *   The state of the associated field. One of
+     *   Drupal.quickedit.FieldModel.states.
      */
     stateChange: function (model, state) {
       var from = model.previous('state');
@@ -80,7 +81,7 @@
           if (from !== 'activating') {
             this.prepareEdit();
           }
-          if (this.editorView.getEditUISettings().padding) {
+          if (this.editorView.getQuickEditUISettings().padding) {
             this._pad();
           }
           break;
@@ -102,7 +103,7 @@
      * changed and stored before by the user (i.e. remotely, stored in TempStore).
      */
     renderChanged: function () {
-      this.$el.toggleClass('edit-changed', this.model.get('isChanged') || this.model.get('inTempStore'));
+      this.$el.toggleClass('quickedit-changed', this.model.get('isChanged') || this.model.get('inTempStore'));
     },
 
     /**
@@ -142,14 +143,14 @@
      * Adds classes used to indicate an elements editable state.
      */
     decorate: function () {
-      this.$el.addClass('edit-candidate edit-editable');
+      this.$el.addClass('quickedit-candidate quickedit-editable');
     },
 
     /**
      * Removes classes used to indicate an elements editable state.
      */
     undecorate: function () {
-      this.$el.removeClass('edit-candidate edit-editable edit-highlighted edit-editing');
+      this.$el.removeClass('quickedit-candidate quickedit-editable quickedit-highlighted quickedit-editing');
     },
 
     /**
@@ -159,26 +160,26 @@
       // Animations.
       var that = this;
       // Use a timeout to grab the next available animation frame.
-      that.$el.addClass('edit-highlighted');
+      that.$el.addClass('quickedit-highlighted');
     },
 
     /**
      * Removes the class that indicates that an element is highlighted.
      */
     stopHighlight: function () {
-      this.$el.removeClass('edit-highlighted');
+      this.$el.removeClass('quickedit-highlighted');
     },
 
     /**
      * Removes the class that indicates that an element as editable.
      */
     prepareEdit: function () {
-      this.$el.addClass('edit-editing');
+      this.$el.addClass('quickedit-editing');
 
       // Allow the field to be styled differently while editing in a pop-up
       // in-place editor.
-      if (this.editorView.getEditUISettings().popup) {
-        this.$el.addClass('edit-editor-is-popup');
+      if (this.editorView.getQuickEditUISettings().popup) {
+        this.$el.addClass('quickedit-editor-is-popup');
       }
     },
 
@@ -189,15 +190,15 @@
      * again available to be edited.
      */
     stopEdit: function () {
-      this.$el.removeClass('edit-highlighted edit-editing');
+      this.$el.removeClass('quickedit-highlighted quickedit-editing');
 
       // Done editing in a pop-up in-place editor; remove the class.
-      if (this.editorView.getEditUISettings().popup) {
-        this.$el.removeClass('edit-editor-is-popup');
+      if (this.editorView.getQuickEditUISettings().popup) {
+        this.$el.removeClass('quickedit-editor-is-popup');
       }
 
       // Make the other editors show up again.
-      $('.edit-candidate').addClass('edit-editable');
+      $('.quickedit-candidate').addClass('quickedit-editable');
     },
 
     /**
@@ -205,7 +206,7 @@
      */
     _pad: function () {
       // Early return if the element has already been padded.
-      if (this.$el.data('edit-padded')) {
+      if (this.$el.data('quickedit-padded')) {
         return;
       }
       var self = this;
@@ -217,7 +218,7 @@
       if (this.$el[0].style.width === "") {
         this._widthAttributeIsEmpty = true;
         this.$el
-          .addClass('edit-animate-disable-width')
+          .addClass('quickedit-animate-disable-width')
           .css('width', this.$el.width())
           .css('background-color', this._getBgColor(this.$el));
       }
@@ -226,7 +227,7 @@
       var posProp = this._getPositionProperties(this.$el);
       setTimeout(function () {
         // Re-enable width animations (padding changes affect width too!).
-        self.$el.removeClass('edit-animate-disable-width');
+        self.$el.removeClass('quickedit-animate-disable-width');
 
         // Pad the editable.
         self.$el
@@ -240,7 +241,7 @@
           'padding-bottom': posProp['padding-bottom'] + 5 + 'px',
           'margin-bottom':  posProp['margin-bottom'] - 10 + 'px'
         })
-        .data('edit-padded', true);
+        .data('quickedit-padded', true);
       }, 0);
     },
 
@@ -249,7 +250,7 @@
      */
     _unpad: function () {
       // Early return if the element has not been padded.
-      if (!this.$el.data('edit-padded')) {
+      if (!this.$el.data('quickedit-padded')) {
         return;
       }
       var self = this;
@@ -257,7 +258,7 @@
       // 1) Set the empty width again.
       if (this._widthAttributeIsEmpty) {
         this.$el
-          .addClass('edit-animate-disable-width')
+          .addClass('quickedit-animate-disable-width')
           .css('width', '')
           .css('background-color', '');
       }
@@ -267,7 +268,7 @@
       var posProp = this._getPositionProperties(this.$el);
       setTimeout(function () {
         // Re-enable width animations (padding changes affect width too!).
-        self.$el.removeClass('edit-animate-disable-width');
+        self.$el.removeClass('quickedit-animate-disable-width');
 
         // Unpad the editable.
         self.$el
@@ -286,7 +287,7 @@
       // done outside the timed out function above so that we don't get numerous
       // queued functions that will remove padding before the data marker has
       // been removed.
-      this.$el.removeData('edit-padded');
+      this.$el.removeData('quickedit-padded');
     },
 
     /**

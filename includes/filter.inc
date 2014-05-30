@@ -30,10 +30,10 @@ define('FILTER_TYPE_TRANSFORM_IRREVERSIBLE', 3);
 /**
  * Implements hook_filter_info_alter().
  *
- * Assigns filter types to Drupal core and contrib modules to allow the Edit
- * module's CKEditor integration to reason about filters.
+ * Assigns filter types to Drupal core and contrib modules to allow the Quick
+ * Edit module's CKEditor integration to reason about filters.
  */
-function edit_filter_info_alter(&$info) {
+function quickedit_filter_info_alter(&$info) {
   /* CORE */
   if (module_exists('php')) {
     // php.module
@@ -110,7 +110,7 @@ function edit_filter_info_alter(&$info) {
  *   except for filters of the types that are marked to be skipped.
  *   FILTER_TYPE_HTML_RESTRICTOR is the only type that cannot be skipped.
  *
- * @see edit_filter_info_alter()
+ * @see quickedit_filter_info_alter()
  */
 function check_markup2($text, $format_id = NULL, $langcode = '', $cache = FALSE, $filter_types_to_skip = array()) {
   if (!isset($format_id)) {
@@ -206,7 +206,7 @@ function filter_get_filter_types_by_format($format_id) {
     }
 
     if (!isset($filters_info[$filter->name]['type'])) {
-      drupal_set_message(t('The filter "!filter" has no type specified! This is required for the Edit module. Please consult Edit module\'s README.', array('!filter' => $filter->name)), 'error');
+      drupal_set_message(t('The filter "!filter" has no type specified! This is required for the Quick Edit module. Please consult Quick Edit module\'s README.', array('!filter' => $filter->name)), 'error');
       continue;
     }
 

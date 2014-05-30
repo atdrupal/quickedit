@@ -4,20 +4,20 @@
  * @file
  * Defines the "plain_text" in-place editor.
  *
- * @see Drupal 8's \Drupal\edit\Plugin\InPlaceEditor\PlainTextEditor.
+ * @see Drupal 8's \Drupal\quickedit\Plugin\InPlaceEditor\PlainTextEditor.
  */
 
-module_load_include('php', 'edit', 'includes/EditInPlaceEditorInterface');
+module_load_include('php', 'quickedit', 'includes/QuickEditInPlaceEditorInterface');
 
 /**
  * Defines the plain text in-place editor.
  */
-class PlainTextEditor implements EditInPlaceEditorInterface{
+class PlainTextEditor implements QuickEditInPlaceEditorInterface{
 
   /**
-   * Implements EditInPlaceEditorInterface::isCompatible().
+   * Implements QuickEditInPlaceEditorInterface::isCompatible().
    *
-   * @see Drupal 8's \Drupal\edit\Plugin\InPlaceEditor\PlainTextEditor::isCompatible().
+   * @see Drupal 8's \Drupal\quickedit\Plugin\InPlaceEditor\PlainTextEditor::isCompatible().
    */
   public function isCompatible(array $instance, array $items) {
     $field = field_info_field($instance['field_name']);
@@ -31,23 +31,23 @@ class PlainTextEditor implements EditInPlaceEditorInterface{
   }
 
   /**
-   * Implements EditInPlaceEditorInterface::getMetadata().
+   * Implements QuickEditInPlaceEditorInterface::getMetadata().
    *
-   * @see Drupal 8's \Drupal\edit\Plugin\InPlaceEditor\PlainTextEditor::getMetadata().
+   * @see Drupal 8's \Drupal\quickedit\Plugin\InPlaceEditor\PlainTextEditor::getMetadata().
    */
   public function getMetadata(array $instance, array $items) {
     return array();
   }
 
   /**
-   * Implements EditInPlaceEditorInterface::getAttachments().
+   * Implements QuickEditInPlaceEditorInterface::getAttachments().
    *
-   * @see Drupal 8's \Drupal\edit\Plugin\InPlaceEditor\PlainTextEditor::getAttachments().
+   * @see Drupal 8's \Drupal\quickedit\Plugin\InPlaceEditor\PlainTextEditor::getAttachments().
    */
   public function getAttachments() {
     return array(
       'library' => array(
-        array('edit', 'edit.inPlaceEditor.plainText'),
+        array('quickedit', 'quickedit.inPlaceEditor.plainText'),
       ),
     );
   }

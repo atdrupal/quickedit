@@ -19,7 +19,7 @@ Installation
    start in-place editing of that node!
 
 If you're using Panels, then you'll want to apply a patch that fixes a bug in
-Panels which prevents Edit from working: https://drupal.org/node/2169571.
+Panels which prevents Quick Edit from working: https://drupal.org/node/2169571.
 
 
 In-place WYSIWYG editing using CKEditor
@@ -28,7 +28,7 @@ In-place WYSIWYG editing using CKEditor
    CKEditor module from http://drupal.org/project/ckeditor.
    Note that *only* the CKEditor module is supported, not any other module, like
    the "Wysiwyg" module (http://drupal.org/project/wysiwyg).
-2. Download this Edit-optimized build of CKEditor:
+2. Download this Quick Edit-optimized build of CKEditor:
    http://download.cksource.com/CKEditor%20for%20Drupal/edit/ckeditor_4.3.2_edit.zip
    Alternatively, go to http://ckeditor.com/builder, choose any preset you like,
    then add the "Shared Space" plugin to the list of "Selected plugins". Then
@@ -55,7 +55,7 @@ Q: I can't see any contextual links, what now?
 A: Your theme is probably stripping them. Your theme's templates must always
    print "$title_suffix".
    See https://drupal.org/documentation/modules/contextual.
-Q: Edit breaks my node titles!
+Q: Quick Edit breaks my node titles!
 A: This probably means you're using a theme that inappropriately uses the node
    title as a "title" attribute as well, without stripping any HTML used in the
    title. Within an attribute, HTML is pointless and potentially harmful.
@@ -65,14 +65,14 @@ A: This probably means you're using a theme that inappropriately uses the node
      title="<?php print filter_xss($title, array()) ?>"
    This ensures that any HTML tags are stripped from the title.
    See http://drupal.org/node/1913964#comment-7231462 for details.
-Q: Why does Edit add attributes to my HTML even for users that don't have the
-   permission to use in-place editing?
+Q: Why does Quick Edit add attributes to my HTML even for users that don't have
+   the permission to use in-place editing?
 A: First: precisely because these are just small bits of metadata, there is no
    harm; there is no security risk involved.
    Second: it is by design, this metadata is always added, to not break Drupal's
    render cache.
-Q: The status report says "Edit's attributes on entities are missing" or "Edit's
-   attributes on fields are missing.". How do I fix these?
+Q: The status report says "Quick Edit's attributes on entities are missing" or
+   "Quick Edit's attributes on fields are missing.". How do I fix these?
 A: Your theme is probably stripping them. Your theme's templates must always
    print "$attributes" for entities and fields. This implies that a wrapper for
    each field is a requirement. If you're not using a wrapper yet for e.g. your
@@ -90,29 +90,31 @@ A: Your theme is stripping either just the "region-content" class on the
    a work-around, see https://drupal.org/comment/8310077#comment-8310077 and
    https://drupal.org/comment/8310093#comment-8310093.
 Q: Why do I get a 'The filter "<filter name>" has no type specified!' error?
-A: For Edit module to allow for in-place editing of "processed text" fields
-   (i.e. text passed through Drupal's filter system, via check_markup()), it
-   needs to know about each filter what type of filter it is. For simpler text
-   formats (i.e. with simpler filters), the unfiltered original may not have to
-   be retrieved from the server. See http://drupal.org/node/1817474 for details.
+A: For Quick Edit module to allow for in-place editing of "processed text"
+   fields (i.e. text passed through Drupal's filter system, via check_markup()),
+   it needs to know about each filter what type of filter it is. For simpler
+   text formats (i.e. with simpler filters), the unfiltered original may not
+   have to be retrieved from the server. See http://drupal.org/node/1817474 for
+   details.
 Q: I want to disable in-place editing for a field.
-A: Any field that has the #skip_edit property set on it will not be made
+A: Any field that has the #skip_quickedit property set on it will not be made
    in-place editable. You can add this property through
    hook_field_attach_view_alter(). e.g.:
      function MYMODULE_field_attach_view_alter(&$output, $context) {
        // Disable in-place editing for 'body' fields on 'node' entities.
        if ($context['entity_type'] === 'node' && isset($output['body'])) {
-         $output['body']['#skip_edit'] = TRUE;
+         $output['body']['#skip_quickedit'] = TRUE;
        }
      }
 Q: Why do contextual links now appear on node pages?
-A: Edit.module indeed enables contextual links on node pages as well, to allow
-   users to in-place edit not only "teaser" nodes, but also "full" nodes. If you
-   want to disable this behavior (which also means disabling in-place editing on
-   node pages!), then you can undo the changes made by edit_node_view_alter() in
-   another module, by either implementing hook_node_view_alter() yourself, or by
-   implementing hook_module_implements_alter() to prevent edit_node_view_alter()
-   from being executed.
+A: Quick Edit module indeed enables contextual links on node pages as well, to
+   allow users to in-place edit not only "teaser" nodes, but also "full" nodes.
+   If you want to disable this behavior (which also means disabling in-place
+   editing on node pages!), then you can undo the changes made by
+   quickedit_node_view_alter() in another module, by either implementing
+   hook_node_view_alter() yourself, or by implementing
+   hook_module_implements_alter() to prevent quickedit_node_view_alter() from
+   being executed.
 
 
 Drupal 8 to Drupal 7 backporting considerations

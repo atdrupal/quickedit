@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Hooks provided by the Edit module.
+ * Hooks provided by the Quick Edit module.
  */
 
 /**
@@ -25,15 +25,15 @@
  *     loaded to be able to use the in-place editor plugin class
  *   - class: the name of the class that represents this in-place editor.
  *
- * @see Drupal 8's \Drupal\edit\Annotation\InPlaceEditor
- * @see Drupal 8's \Drupal\edit\Plugin\InPlaceEditorBase
+ * @see Drupal 8's \Drupal\quickedit\Annotation\InPlaceEditor
+ * @see Drupal 8's \Drupal\quickedit\Plugin\InPlaceEditorBase
  *
  * @see InPlaceEditors/CKEditor.php
  * @see InPlaceEditors/formEditor.php
  * @see InPlaceEditors/plainTextEditor.php
  */
-function hook_edit_editor_info() {
-  $path = drupal_get_path('module', 'edit') . '/InPlaceEditors';
+function hook_quickedit_editor_info() {
+  $path = drupal_get_path('module', 'quickedit') . '/InPlaceEditors';
 
   // The "plain_text" in-place editor only works for text fields without a text
   // format.
@@ -48,8 +48,8 @@ function hook_edit_editor_info() {
     $editors['ckeditor'] = array(
       // Therefor, the "ckeditor" in-place editor is marked as an alternative to
       // the "plain_text" in-place editor. Thanks to both plugins'
-      // implementations of EditInPlaceEditorInterface::isCompatible(), it is
-      // ensured that the right in-place editor is used.
+      // implementations of QuickEditInPlaceEditorInterface::isCompatible(), it
+      // is ensured that the right in-place editor is used.
       'alternativeTo' => array('plain_text'),
       'file' => $path . '/CKEditor.php',
       'class' => 'CKEditor',
@@ -65,7 +65,7 @@ function hook_edit_editor_info() {
  * @param array &$editors
  *   An array of metadata on existing in-place editors.
  */
-function hook_edit_editor_info_alter(&$editors) {
+function hook_quickedit_editor_info_alter(&$editors) {
 
 }
 
@@ -84,7 +84,7 @@ function hook_edit_editor_info_alter(&$editors) {
  *     - 'items': (not provided for "extra" fields) the items of this field on
  *       this entity
  */
-function hook_edit_editor_metadata_alter(&$metadata, $context) {
+function hook_quickedit_editor_metadata_alter(&$metadata, $context) {
   // Exclude every node title from in-place editing.
   if ($context['entity_type'] === 'node' && $context['field_name'] === 'title') {
     $metadata['access'] = FALSE;
@@ -99,7 +99,7 @@ function hook_edit_editor_metadata_alter(&$metadata, $context) {
  * @param $editor_id
  *   ID of the currently used editor.
  */
-function hook_edit_editor_attachments_alter(&$attachments, $editor_id) {
+function hook_quickedit_editor_attachments_alter(&$attachments, $editor_id) {
   if ($editor_id === 'ckeditor') {
     $attachments['library'][] = array('mymodule', 'myjslibrary');
   }
@@ -113,12 +113,13 @@ function hook_edit_editor_attachments_alter(&$attachments, $editor_id) {
  * following in-place editing in the exact way it was displayed originally),
  * implement this hook.
  *
- * Edit module integrates with HTML elements with data-edit-field-id attributes.
+ * Quick Edit module integrates with HTML elements with data-quickedit-field-id
+ * attributes.
  * For example:
- *   data-edit-field-id="node/1/<field-name>/und/<module-name>-<custom-id>"
+ *   data-quickedit-field-id="node/1/<field-name>/und/<module-name>-<custom-id>"
  * After the editing is complete, this hook is invoked on the module with
- * the custom render pipeline identifier (last part of data-edit-field-id) to
- * re-render the field. Use the same logic used when rendering the field for
+ * the custom render pipeline identifier (last part of data-quickedit-field-id)
+ * to re-render the field. Use the same logic used when rendering the field for
  * the original display.
  *
  * The implementation should take care of invoking the prepare_view steps. It
@@ -148,7 +149,7 @@ function hook_edit_editor_attachments_alter(&$attachments, $editor_id) {
  *
  * @see field_view_field()
  */
-function hook_edit_render_field($entity_type, $entity, $field_name, $view_mode_id, $langcode) {
+function hook_quickedit_render_field($entity_type, $entity, $field_name, $view_mode_id, $langcode) {
   return array(
     '#prefix' => '<div class="example-markup">',
     'field' => field_view_field($entity_type, $entity, $field_name, $view_mode_id, $langcode),

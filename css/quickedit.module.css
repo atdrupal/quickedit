@@ -1,31 +1,31 @@
 /**
  * @file
- * Generic base styles for edit module.
+ * Generic base styles for Quick Edit module.
  */
 
 /**
  * Editable.
  */
-.edit-editable {
+.quickedit-editable {
   z-index: 98;
   position: relative;
   cursor: pointer;
 }
-.edit-editable:focus {
+.quickedit-editable:focus {
   outline: none;
 }
 
 /**
  * Highlighted (hovered) editable.
  */
-.edit-editable.edit-highlighted {
+.quickedit-editable.quickedit-highlighted {
   z-index: 99;
 }
-.edit-validation-errors > .messages {
+.quickedit-validation-errors > .messages {
   margin-left: 0;
   margin-right: 0;
 }
-.edit-validation-errors > .messages > ul {
+.quickedit-validation-errors > .messages > ul {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -34,18 +34,18 @@
 /**
  * In-place editors that don't use a popup.
  */
-.edit-validation-errors {
+.quickedit-validation-errors {
   z-index: 300;
   position: relative;
 }
-.edit-validation-errors .messages.error {
+.quickedit-validation-errors .messages.error {
   position: absolute;
   top: 6px;
   left: -5px; /* LTR */
   margin: 0;
   border: none;
 }
-[dir="rtl"] .edit-validation-errors .messages.error {
+[dir="rtl"] .quickedit-validation-errors .messages.error {
   left: auto;
   right: -5px;
 }
@@ -53,46 +53,46 @@
 /**
  * Styling specific to the 'form' in-place editor.
  */
-#edit_backstage {
+#quickedit_backstage {
   display: none;
 }
-.edit-form {
+.quickedit-form {
   position: absolute;
   z-index: 300;
   max-width: 35em;
 }
-.edit-form .placeholder {
+.quickedit-form .placeholder {
   min-height: 22px;
 }
 
 /**
  * Default form styling overrides.
  */
-.edit-form .form-wrapper .form-wrapper {
+.quickedit-form .form-wrapper .form-wrapper {
   margin: inherit;
 }
-.edit-form .form-actions {
+.quickedit-form .form-actions {
   display: none;
 }
-.edit-form input {
+.quickedit-form input {
   max-width: 100%;
 }
 
 /**
  * Entity toolbar.
  */
-.edit-toolbar-container {
+.quickedit-toolbar-container {
   max-width: 100%;
   position: absolute;
   max-width: 320px;
   width: 320px;
   z-index: 100;
 }
-.edit-toolbar-container > .edit-toolbar-pointer,
-.edit-toolbar-container > .edit-toolbar-lining {
+.quickedit-toolbar-container > .quickedit-toolbar-pointer,
+.quickedit-toolbar-container > .quickedit-toolbar-lining {
   display: none;
 }
-.edit-form-container {
+.quickedit-form-container {
   position: relative;
   padding: 0;
   border: 0;
@@ -100,16 +100,16 @@
   vertical-align: baseline;
   z-index: 100;
 }
-.edit-toolgroup.ops {
+.quickedit-toolgroup.ops {
   float: right; /* LTR */
 }
-[dir="rtl"] .edit-toolgroup.ops {
+[dir="rtl"] .quickedit-toolgroup.ops {
   float: left;
 }
-.edit-toolbar-label {
+.quickedit-toolbar-label {
   overflow: hidden;
 }
-#edit-toolbar-fence {
+#quickedit-toolbar-fence {
   bottom: 0;
   left: 0;
   right: 0;
@@ -121,13 +121,13 @@
 /**
  * Modal.
  */
-#edit_modal {
+#quickedit_modal {
   z-index: 350;
   position: fixed;
   top: 40%;
   left: 40%; /* LTR */
 }
-[dir="rtl"] #edit_modal {
+[dir="rtl"] #quickedit_modal {
   left: auto;
   right: 40%;
 }

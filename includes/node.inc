@@ -2,16 +2,16 @@
 
 /**
  * @file
- * Implements Edit module hooks on behalf of node.module.
+ * Implements Quick Edit module hooks on behalf of node.module.
  */
 
 /**
- * Implements hook_edit_extra_fields_info().
+ * Implements hook_quickedit_extra_fields_info().
  *
- * @todo document this in edit.api.php, but first evolve this to ensure it is a
- *   sufficiently complete API.
+ * @todo document this in quickedit.api.php, but first evolve this to ensure it
+ *   is a sufficiently complete API.
  */
-function node_edit_extra_fields_info() {
+function node_quickedit_extra_fields_info() {
   $extra['node'] = array(
     'title' => array(
       'label' => t('Title'),
@@ -20,23 +20,23 @@ function node_edit_extra_fields_info() {
         'full' => 'plain_text',
         'teaser' => 'plain_text',
       ),
-      'edit subform id' => 'edit_field_node_title_edit_form',
+      'quickedit subform id' => 'quickedit_field_node_title_edit_form',
       'form simplification element key' => 'title',
-      'rerender callback' => 'edit_field_node_title_rerender',
+      'rerender callback' => 'quickedit_field_node_title_rerender',
     ),
     'author' => array(
       'label' => t('Author'),
       'default editor' => 'form',
-      'edit subform id' => 'edit_field_node_author_edit_form',
+      'quickedit subform id' => 'quickedit_field_node_author_edit_form',
       'form simplification element key' => 'name',
-      'rerender callback' => 'edit_field_node_author_rerender',
+      'rerender callback' => 'quickedit_field_node_author_rerender',
     ),
     'created' => array(
       'label' => t('Created'),
       'default editor' => 'form',
-      'edit subform id' => 'edit_field_node_created_edit_form',
+      'quickedit subform id' => 'quickedit_field_node_created_edit_form',
       'form simplification element key' => 'date',
-      'rerender callback' => 'edit_field_node_created_rerender',
+      'rerender callback' => 'quickedit_field_node_created_rerender',
     ),
   );
   return $extra;
@@ -47,12 +47,12 @@ function node_edit_extra_fields_info() {
  *
  * This isn't a true form. As such it modifies the $form by reference.
  *
- * @see edit_field_node_author_edit_form_validate()
- * @see edit_field_node_author_edit_form_submit()
+ * @see quickedit_field_node_author_edit_form_validate()
+ * @see quickedit_field_node_author_edit_form_submit()
  * @ingroup forms
  */
-function edit_field_node_author_edit_form(&$form, &$form_state, $node, $field_name) {
-  _edit_node_object_prepare($node);
+function quickedit_field_node_author_edit_form(&$form, &$form_state, $node, $field_name) {
+  _quickedit_node_object_prepare($node);
 
   $form['name'] = array(
     '#type' => 'textfield',
@@ -64,18 +64,18 @@ function edit_field_node_author_edit_form(&$form, &$form_state, $node, $field_na
     '#description' => t('Leave blank for %anonymous.', array('%anonymous' => variable_get('anonymous', t('Anonymous')))),
   );
 
-  $form['#validate'][] = 'edit_field_node_author_edit_form_validate';
-  $form['#submit'][] = 'edit_field_node_author_edit_form_submit';
+  $form['#validate'][] = 'quickedit_field_node_author_edit_form_validate';
+  $form['#submit'][] = 'quickedit_field_node_author_edit_form_submit';
 }
 
 /**
- * Form validation handler for edit_field_node_author_edit_form().
+ * Form validation handler for quickedit_field_node_author_edit_form().
  *
  * @see node_validate()
- * @see edit_field_node_author_edit_form()
- * @see edit_field_node_author_edit_form_submit()
+ * @see quickedit_field_node_author_edit_form()
+ * @see quickedit_field_node_author_edit_form_submit()
  */
-function edit_field_node_author_edit_form_validate($form, &$form_state) {
+function quickedit_field_node_author_edit_form_validate($form, &$form_state) {
   $name = $form_state['values']['name'];
   if (!empty($name) && !($account = user_load_by_name($name))) {
     // The use of empty() is mandatory in the context of usernames
@@ -86,13 +86,13 @@ function edit_field_node_author_edit_form_validate($form, &$form_state) {
 }
 
 /**
- * Form submission handler for edit_field_node_author_edit_form().
+ * Form submission handler for quickedit_field_node_author_edit_form().
  *
  * @see node_submit()
- * @see edit_field_node_author_edit_form()
- * @see edit_field_node_author_edit_form_validate()
+ * @see quickedit_field_node_author_edit_form()
+ * @see quickedit_field_node_author_edit_form_validate()
  */
-function edit_field_node_author_edit_form_submit($form, &$form_state) {
+function quickedit_field_node_author_edit_form_submit($form, &$form_state) {
   $entity = $form_state['entity'];
   if ($account = user_load_by_name($form_state['values']['name'])) {
     $entity->uid = $account->uid;
@@ -101,14 +101,14 @@ function edit_field_node_author_edit_form_submit($form, &$form_state) {
   else {
     $entity->uid = 0;
   }
-  // We must load fape.inc to use _edit_entity_set_log().
-  module_load_include('inc', 'edit', 'includes/fape');
-  _edit_entity_set_log($entity, t('Author'));
+  // We must load fape.inc to use _quickedit_entity_set_log().
+  module_load_include('inc', 'quickedit', 'includes/fape');
+  _quickedit_entity_set_log($entity, t('Author'));
 
-  _edit_entity_save_to_tempstore($form_state['entity_type'], $form_state['entity_id'], $entity);
+  _quickedit_entity_save_to_tempstore($form_state['entity_type'], $form_state['entity_id'], $entity);
 }
 
-function edit_field_node_author_rerender($entity) {
+function quickedit_field_node_author_rerender($entity) {
   return array(
     'value' => theme('username', array('account' => $entity, 'name' => $entity->name)),
     'inline' => TRUE,
@@ -121,12 +121,12 @@ function edit_field_node_author_rerender($entity) {
  *
  * This isn't a true form. As such it modifies the $form by reference.
  *
- * @see edit_field_node_created_edit_form_validate()
- * @see edit_field_node_created_edit_form_submit()
+ * @see quickedit_field_node_created_edit_form_validate()
+ * @see quickedit_field_node_created_edit_form_submit()
  * @ingroup forms
  */
-function edit_field_node_created_edit_form(&$form, &$form_state, $node, $field_name) {
-  _edit_node_object_prepare($node);
+function quickedit_field_node_created_edit_form(&$form, &$form_state, $node, $field_name) {
+  _quickedit_node_object_prepare($node);
 
   $form['date'] = array(
     '#type' => 'textfield',
@@ -136,18 +136,18 @@ function edit_field_node_created_edit_form(&$form, &$form_state, $node, $field_n
     '#default_value' => !empty($node->date) ? $node->date : '',
   );
 
-  $form['#validate'][] = 'edit_field_node_created_edit_form_validate';
-  $form['#submit'][]   = 'edit_field_node_created_edit_form_submit';
+  $form['#validate'][] = 'quickedit_field_node_created_edit_form_validate';
+  $form['#submit'][]   = 'quickedit_field_node_created_edit_form_submit';
 }
 
 /**
- * Form validation handler for edit_field_node_created_edit_form().
+ * Form validation handler for quickedit_field_node_created_edit_form().
  *
  * @see node_validate()
- * @see edit_field_node_created_edit_form()
- * @see edit_field_node_created_edit_form_submit()
+ * @see quickedit_field_node_created_edit_form()
+ * @see quickedit_field_node_created_edit_form_submit()
  */
-function edit_field_node_created_edit_form_validate($form, &$form_state) {
+function quickedit_field_node_created_edit_form_validate($form, &$form_state) {
   $date = $form_state['values']['date'];
   if (!empty($date) && strtotime($date) === FALSE) {
     form_set_error('date', t('You have to specify a valid date.'));
@@ -155,24 +155,24 @@ function edit_field_node_created_edit_form_validate($form, &$form_state) {
 }
 
 /**
- * Form submission handler for edit_field_node_created_edit_form().
+ * Form submission handler for quickedit_field_node_created_edit_form().
  *
  * @see node_submit()
- * @see edit_field_node_created_edit_form()
- * @see edit_field_node_created_edit_form_validate()
+ * @see quickedit_field_node_created_edit_form()
+ * @see quickedit_field_node_created_edit_form_validate()
  */
-function edit_field_node_created_edit_form_submit($form, &$form_state) {
+function quickedit_field_node_created_edit_form_submit($form, &$form_state) {
   $entity = $form_state['entity'];
   $date = $form_state['values']['date'];
   $entity->created = !empty($date) ? strtotime($date) : REQUEST_TIME;
-  // We must load fape.inc to use _edit_entity_set_log().
-  module_load_include('inc', 'edit', 'includes/fape');
-  _edit_entity_set_log($entity, t('Date'));
+  // We must load fape.inc to use _quickedit_entity_set_log().
+  module_load_include('inc', 'quickedit', 'includes/fape');
+  _quickedit_entity_set_log($entity, t('Date'));
 
-  _edit_entity_save_to_tempstore($form_state['entity_type'], $form_state['entity_id'], $entity);
+  _quickedit_entity_save_to_tempstore($form_state['entity_type'], $form_state['entity_id'], $entity);
 }
 
-function edit_field_node_created_rerender($entity) {
+function quickedit_field_node_created_rerender($entity) {
   return array('value' => format_date($entity->created), 'inline' => TRUE);
 }
 
@@ -181,11 +181,11 @@ function edit_field_node_created_rerender($entity) {
  *
  * This isn't a true form. As such it modifies the $form by reference.
  *
- * @see edit_field_node_title_edit_form_submit()
+ * @see quickedit_field_node_title_edit_form_submit()
  * @ingroup forms
  */
-function edit_field_node_title_edit_form(&$form, &$form_state, $node, $field_name) {
-  _edit_node_object_prepare($node);
+function quickedit_field_node_title_edit_form(&$form, &$form_state, $node, $field_name) {
+  _quickedit_node_object_prepare($node);
 
   $type = node_type_get_type($node);
   $form['title'] = array(
@@ -196,26 +196,26 @@ function edit_field_node_title_edit_form(&$form, &$form_state, $node, $field_nam
     '#weight' => -5,
   );
 
-  $form['#submit'][] = 'edit_field_node_title_edit_form_submit';
+  $form['#submit'][] = 'quickedit_field_node_title_edit_form_submit';
 }
 
 /**
- * Form submission handler for edit_field_node_title_edit_form().
+ * Form submission handler for quickedit_field_node_title_edit_form().
  *
  * @see node_submit()
- * @see edit_field_node_title_edit_form()
+ * @see quickedit_field_node_title_edit_form()
  */
-function edit_field_node_title_edit_form_submit($form, &$form_state) {
+function quickedit_field_node_title_edit_form_submit($form, &$form_state) {
   $entity = $form_state['entity'];
   $entity->title = $form_state['values']['title'];
-  // We must load fape.inc to use _edit_entity_set_log().
-  module_load_include('inc', 'edit', 'includes/fape');
-  _edit_entity_set_log($entity, t('Title'));
+  // We must load fape.inc to use _quickedit_entity_set_log().
+  module_load_include('inc', 'quickedit', 'includes/fape');
+  _quickedit_entity_set_log($entity, t('Title'));
 
-  _edit_entity_save_to_tempstore($form_state['entity_type'], $form_state['entity_id'], $entity);
+  _quickedit_entity_save_to_tempstore($form_state['entity_type'], $form_state['entity_id'], $entity);
 }
 
-function edit_field_node_title_rerender($entity) {
+function quickedit_field_node_title_rerender($entity) {
   return array('value' => $entity->title, 'inline' => FALSE);
 }
 
@@ -228,7 +228,7 @@ function edit_field_node_title_rerender($entity) {
  *
  * @see node_object_prepare()
  */
-function _edit_node_object_prepare(&$node) {
+function _quickedit_node_object_prepare(&$node) {
   node_object_prepare($node);
 
   // menu_node_save() specifically checks the presence of the "enabled" flag,

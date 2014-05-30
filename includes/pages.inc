@@ -7,31 +7,31 @@
 /**
  * Page callback: Returns the metadata for a set of fields.
  *
- * Given a list of field edit IDs as POST parameters, run access checks on the
- * entity and field level to determine whether the current user may edit them.
- * Also retrieves other metadata.
+ * Given a list of field quickedit IDs as POST parameters, run access checks on
+ * the entity and field level to determine whether the current user may edit
+ * them. Also retrieves other metadata.
  *
  * @return
  *   The JSON response.
  *
- * @see Drupal 8's EditController::metadata()
- * @see EditMetadataGenerator
+ * @see Drupal 8's QuickEditController::metadata()
+ * @see QuickEditMetadataGenerator
  * @see EditEntityFieldAccessCheck
- * @see EditEditorSelector
+ * @see QuickEditEditorSelector
  */
-function edit_metadata() {
+function quickedit_metadata() {
   $fields = $_POST['fields'];
   if (!isset($fields)) {
     return MENU_NOT_FOUND;
   }
   $entities = (isset($_POST['entities'])) ? $_POST['entities'] : array();
 
-  module_load_include('php', 'edit', 'includes/EditEntityFieldAccessCheck');
-  module_load_include('php', 'edit', 'includes/EditEditorSelector');
-  module_load_include('php', 'edit', 'includes/EditMetadataGenerator');
+  module_load_include('php', 'quickedit', 'includes/EditEntityFieldAccessCheck');
+  module_load_include('php', 'quickedit', 'includes/QuickEditEditorSelector');
+  module_load_include('php', 'quickedit', 'includes/QuickEditMetadataGenerator');
   $accessChecker = new EditEntityFieldAccessCheck();
-  $editorSelector = new EditEditorSelector();
-  $metadataGenerator = new EditMetadataGenerator($accessChecker, $editorSelector);
+  $editorSelector = new QuickEditEditorSelector();
+  $metadataGenerator = new QuickEditMetadataGenerator($accessChecker, $editorSelector);
 
   // Build metadata for each field, track all in-place editors.
   $metadata = array();
@@ -50,7 +50,7 @@ function edit_metadata() {
     list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
 
     // Validate the field name and language.
-    if (!_edit_is_extra_field($entity_type, $field_name)) {
+    if (!_quickedit_is_extra_field($entity_type, $field_name)) {
       if (!$field_name || !($instance = field_info_instance($entity_type, $field_name, $bundle))) {
         return MENU_NOT_FOUND;
       }
@@ -89,17 +89,17 @@ function edit_metadata() {
  * @return
  *   The Ajax response.
  *
- * @see Drupal 8's EditController::attachments()
- * @see EditEditorSelector
+ * @see Drupal 8's QuickEditController::attachments()
+ * @see QuickEditEditorSelector
  */
-function edit_attachments() {
+function quickedit_attachments() {
   $editors = $_POST['editors'];
   if (!isset($editors)) {
     return MENU_NOT_FOUND;
   }
 
-  module_load_include('php', 'edit', 'includes/EditEditorSelector');
-  $editorSelector = new EditEditorSelector();
+  module_load_include('php', 'quickedit', 'includes/QuickEditEditorSelector');
+  $editorSelector = new QuickEditEditorSelector();
 
   // Ensure an AJAX command is generated to load in-place editor attachments.
   $elements['#attached'] = $editorSelector->getEditorAttachments($editors);
@@ -128,26 +128,26 @@ function edit_attachments() {
  *   The name of the language for which the field is being edited.
  * @param string $view_mode
  *   The view mode the field should be rerendered in. Either an Entity Display
- *   view mode ID, or a custom one. See hook_edit_render_field().
+ *   view mode ID, or a custom one. See hook_quickedit_render_field().
  *
  * @return string
  *   Rendered HTML.
  *
- * @see hook_edit_render_field()
+ * @see hook_quickedit_render_field()
  */
-function _edit_render_field($entity_type, $entity, $field_name, $langcode, $view_mode) {
+function _quickedit_render_field($entity_type, $entity, $field_name, $langcode, $view_mode) {
   $entity_info = entity_get_info($entity_type);
   $entity_view_mode_ids = array_keys($entity_info['view modes']);
   if (in_array($view_mode, $entity_view_mode_ids)) {
-    if (!_edit_is_extra_field($entity_type, $field_name)) {
+    if (!_quickedit_is_extra_field($entity_type, $field_name)) {
       $field = field_view_field($entity_type, $entity, $field_name, $view_mode, $langcode);
       $output = drupal_render($field);
     }
     else {
       list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
-      $rerender_callback = edit_extra_field_info($entity_type, $field_name, 'rerender callback');
+      $rerender_callback = quickedit_extra_field_info($entity_type, $field_name, 'rerender callback');
       $result = $rerender_callback($entity);
-      $output = edit_wrap_pseudofield(
+      $output = quickedit_wrap_pseudofield(
         $result['value'],
         "$entity_type/$id/$field_name/$langcode/$view_mode",
         $result['inline']
@@ -159,7 +159,7 @@ function _edit_render_field($entity_type, $entity, $field_name, $langcode, $view
     // by a dash; the first part must be the module name.
     $mode_parts = explode('-', $view_mode, 2);
     $module = reset($mode_parts);
-    $rendered_field = module_invoke($module, 'edit_render_field', $entity_type, $entity, $field_name, $view_mode, $langcode);
+    $rendered_field = module_invoke($module, 'quickedit_render_field', $entity_type, $entity, $field_name, $view_mode, $langcode);
     $output = drupal_render($rendered_field);
   }
 
@@ -182,9 +182,9 @@ function _edit_render_field($entity_type, $entity, $field_name, $langcode, $view
  * @return
  *   The Ajax response.
  *
- * @see Drupal 8's EditController::fieldForm()
+ * @see Drupal 8's QuickEditController::fieldForm()
  */
-function edit_field_edit($entity_type, $entity_id, $field_name, $langcode = NULL, $view_mode = NULL) {
+function quickedit_field_edit($entity_type, $entity_id, $field_name, $langcode = NULL, $view_mode = NULL) {
   $commands = array();
 
   // Load entity whose field is to be edited.
@@ -193,7 +193,7 @@ function edit_field_edit($entity_type, $entity_id, $field_name, $langcode = NULL
   $latest_entity_timestamp = $entity->changed;
 
   // Ensure the user is allowed to edit this field.
-  module_load_include('php', 'edit', 'includes/EditEntityFieldAccessCheck');
+  module_load_include('php', 'quickedit', 'includes/EditEntityFieldAccessCheck');
   $accessChecker = new EditEntityFieldAccessCheck();
   if (!$accessChecker->accessEditEntityField($entity_type, $entity, $field_name)) {
     return MENU_ACCESS_DENIED;
@@ -202,8 +202,8 @@ function edit_field_edit($entity_type, $entity_id, $field_name, $langcode = NULL
   // Replace entity with TempStore copy if available and not resetting, init
   // TempStore copy otherwise.
   ctools_include('object-cache');
-  $tempstore_id = _edit_entity_tempstore_id($entity_type, $entity_id);
-  $tempstore_entity = ctools_object_cache_get('edit', $tempstore_id);
+  $tempstore_id = _quickedit_entity_tempstore_id($entity_type, $entity_id);
+  $tempstore_entity = ctools_object_cache_get('quickedit', $tempstore_id);
   if ($tempstore_entity && (!isset($_POST['reset']) || $_POST['reset'] !== 'true')) {
     // @todo: https://drupal.org/node/2158977 implemented content locking only
     // for nodes, because Drupal 7 only implements it for nodes. We may need to
@@ -212,14 +212,14 @@ function edit_field_edit($entity_type, $entity_id, $field_name, $langcode = NULL
     $entity = $tempstore_entity;
   }
   else {
-    ctools_object_cache_clear('edit', $tempstore_id);
-    ctools_object_cache_set('edit', $tempstore_id, $entity);
+    ctools_object_cache_clear('quickedit', $tempstore_id);
+    ctools_object_cache_set('quickedit', $tempstore_id, $entity);
   }
 
   // Determine which subform should be used, initialize form state, build form.
-  $subform_id = 'edit_field_edit_form';
-  if (_edit_is_extra_field($entity_type, $field_name)) {
-    $subform_id = edit_extra_field_info($entity_type, $field_name, 'edit subform id');
+  $subform_id = 'quickedit_field_edit_form';
+  if (_quickedit_is_extra_field($entity_type, $field_name)) {
+    $subform_id = quickedit_extra_field_info($entity_type, $field_name, 'quickedit subform id');
   }
   $form_state = array(
     'entity_type' => $entity_type,
@@ -235,7 +235,7 @@ function edit_field_edit($entity_type, $entity_id, $field_name, $langcode = NULL
       'args' => array($entity, $field_name),
     ),
   );
-  $form = drupal_build_form('edit_field_form', $form_state);
+  $form = drupal_build_form('quickedit_field_form', $form_state);
 
 
   // Detect an edit conflict if the current entity timestamp is different
@@ -245,7 +245,7 @@ function edit_field_edit($entity_type, $entity_id, $field_name, $langcode = NULL
     drupal_set_message(t('The copy of the content being edited is outdated. Reload the page to edit an up-to-date version.'), 'error');
 
     $commands[] = array(
-      'command' => 'editFieldFormValidationErrors',
+      'command' => 'quickeditFieldFormValidationErrors',
       'data' => theme('status_messages'),
     );
   }
@@ -254,21 +254,21 @@ function edit_field_edit($entity_type, $entity_id, $field_name, $langcode = NULL
     if (!empty($form_state['executed'])) {
       // The form submission saved the entity in TempStore. Return the
       // updated view of the field from the TempStore copy.
-      $entity = ctools_object_cache_get('edit', $tempstore_id);
+      $entity = ctools_object_cache_get('quickedit', $tempstore_id);
 
       // Re-render the updated field.
-      $output = _edit_render_field($entity_type, $entity, $field_name, $langcode, $view_mode);
+      $output = _quickedit_render_field($entity_type, $entity, $field_name, $langcode, $view_mode);
 
       // Re-render the updated field for other view modes (i.e. for other
       // instances of the same logical field on the user's page).
       $other_view_mode_ids = isset($_POST['other_view_modes']) ? $_POST['other_view_modes'] : array();
       $other_view_modes = array();
       foreach ($other_view_mode_ids as $other_view_mode_id) {
-        $other_view_modes[$other_view_mode_id] = _edit_render_field($entity_type, $entity, $field_name, $langcode, $other_view_mode_id);
+        $other_view_modes[$other_view_mode_id] = _quickedit_render_field($entity_type, $entity, $field_name, $langcode, $other_view_mode_id);
       }
 
       $commands[] = array(
-        'command' => 'editFieldFormSaved',
+        'command' => 'quickeditFieldFormSaved',
         'data' => $output,
         'other_view_modes' => $other_view_modes,
       );
@@ -277,14 +277,14 @@ function edit_field_edit($entity_type, $entity_id, $field_name, $langcode = NULL
     // will be form validation errors.)
     else {
       $commands[] = array(
-        'command' => 'editFieldForm',
+        'command' => 'quickeditFieldForm',
         'data' => drupal_render($form),
       );
 
       $errors = form_get_errors();
       if (count($errors)) {
         $commands[] = array(
-          'command' => 'editFieldFormValidationErrors',
+          'command' => 'quickeditFieldFormValidationErrors',
           'data' => theme('status_messages'),
         );
       }
@@ -311,9 +311,9 @@ function edit_field_edit($entity_type, $entity_id, $field_name, $langcode = NULL
  * @return
  *   The Ajax response.
  *
- * @see Drupal 8's EditController::entitySave()
+ * @see Drupal 8's QuickEditController::entitySave()
  */
-function edit_entity_save($entity_type, $entity_id) {
+function quickedit_entity_save($entity_type, $entity_id) {
   // Ensure the user is allowed to edit this entity.
   if (!entity_access('update', $entity_type, entity_load_single($entity_type, $entity_id))) {
     return MENU_ACCESS_DENIED;
@@ -322,9 +322,9 @@ function edit_entity_save($entity_type, $entity_id) {
   // Take the entity from TempStore and save in entity storage. fieldForm()
   // ensures that the TempStore copy exists ahead.
   ctools_include('object-cache');
-  $tempstore_id = _edit_entity_tempstore_id($entity_type, $entity_id);
-  $entity = ctools_object_cache_get('edit', $tempstore_id);
-  ctools_object_cache_clear('edit', $tempstore_id);
+  $tempstore_id = _quickedit_entity_tempstore_id($entity_type, $entity_id);
+  $entity = ctools_object_cache_get('quickedit', $tempstore_id);
+  ctools_object_cache_clear('quickedit', $tempstore_id);
   entity_save($entity_type, $entity);
 
   // Return information about the entity that allows a front end application
@@ -337,7 +337,7 @@ function edit_entity_save($entity_type, $entity_id) {
   // Respond to client that the entity was saved properly.
   $commands = array();
   $commands[] = array(
-    'command' => 'editEntitySaved',
+    'command' => 'quickeditEntitySaved',
     'data' => $output,
   );
   return array('#type' => 'ajax', '#commands' => $commands);
@@ -360,14 +360,14 @@ function edit_entity_save($entity_type, $entity_id) {
  *
  * @see Drupal 8's EditorController::getUntransformedText()
  */
-function edit_ckeditor_get_untransformed_text($entity_type, $entity_id, $field_name, $langcode = NULL, $view_mode = NULL) {
+function quickedit_ckeditor_get_untransformed_text($entity_type, $entity_id, $field_name, $langcode = NULL, $view_mode = NULL) {
   $commands = array();
 
   $entity = entity_load_single($entity_type, $entity_id);
   list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
 
   // Ensure the user is allowed to edit this field.
-  module_load_include('php', 'edit', 'includes/EditEntityFieldAccessCheck');
+  module_load_include('php', 'quickedit', 'includes/EditEntityFieldAccessCheck');
   $accessChecker = new EditEntityFieldAccessCheck();
   if (!$accessChecker->accessEditEntityField($entity_type, $entity, $field_name)) {
     return MENU_ACCESS_DENIED;
@@ -375,11 +375,11 @@ function edit_ckeditor_get_untransformed_text($entity_type, $entity_id, $field_n
 
   // Render the field in our custom display mode; retrieve the re-rendered
   // markup, this is what we're after.
-  $field_output = field_view_field($entity_type, $entity, $field_name, 'edit-render-without-transformation-filters', $langcode);
+  $field_output = field_view_field($entity_type, $entity, $field_name, 'quickedit-render-without-transformation-filters', $langcode);
   $output = $field_output[0]['#markup'];
 
   $commands[] = array(
-    'command' => 'editCKEditorGetUntransformedText',
+    'command' => 'quickeditCKEditorGetUntransformedText',
     'id' => "$entity_type/$id/$field_name/$langcode/$view_mode",
     'data' => $output,
   );
@@ -391,17 +391,17 @@ function edit_ckeditor_get_untransformed_text($entity_type, $entity_id, $field_n
  * Form constructor; in-place editing form for a (single) Field API or "extra"
  * field.
  *
- * For Field API fields, the edit_field_edit_form subform will be used. For
- * "extra" fields, the subform indicated in hook_edit_extra_fields_info() will
- * be used.
+ * For Field API fields, the quickedit_field_edit_form subform will be used. For
+ * "extra" fields, the subform indicated in hook_quickedit_extra_fields_info()
+ * will be used.
  *
- * @see edit_field_edit_form()
+ * @see quickedit_field_edit_form()
  * @ingroup forms
  */
-function edit_field_form($form, &$form_state, $entity, $field_name) {
+function quickedit_field_form($form, &$form_state, $entity, $field_name) {
   $form['#parents'] = array();
 
-  form_load_include($form_state, 'inc', 'edit', 'includes/fape');
+  form_load_include($form_state, 'inc', 'quickedit', 'includes/fape');
 
   if ($form_state['subform_id'] && function_exists($form_state['subform_id'])) {
     $form_state['subform_id']($form, $form_state, $entity, $field_name);
@@ -412,7 +412,7 @@ function edit_field_form($form, &$form_state, $entity, $field_name) {
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
-    '#attributes' => array('class' => array('edit-form-submit')),
+    '#attributes' => array('class' => array('quickedit-form-submit')),
   );
 
   // Remove http://drupal.org/project/metatag form elements.
@@ -424,21 +424,21 @@ function edit_field_form($form, &$form_state, $entity, $field_name) {
   $form['redirect'] = array();
 
   // Simplify it for optimal in-place use.
-  edit_field_form_simplify($form, $form_state);
+  quickedit_field_form_simplify($form, $form_state);
   return $form;
 }
 
 /**
  * Removes unneeded elements from the field from.
  *
- * @see Drupal 8's EditFieldForm::simplify().
+ * @see Drupal 8's QuickEditFieldForm::simplify().
  */
-function edit_field_form_simplify(&$form, &$form_state) {
+function quickedit_field_form_simplify(&$form, &$form_state) {
   $field_name = $form_state['field_name'];
   $langcode = $form_state['langcode'];
 
-  if (_edit_is_extra_field($form_state['entity_type'], $field_name)) {
-    $key = edit_extra_field_info($form_state['entity_type'], $field_name, 'form simplification element key');
+  if (_quickedit_is_extra_field($form_state['entity_type'], $field_name)) {
+    $key = quickedit_extra_field_info($form_state['entity_type'], $field_name, 'form simplification element key');
     $widget_element = &$form[$key];
   }
   else {

@@ -7,7 +7,7 @@
 
   "use strict";
 
-  Drupal.edit.ContextualLinkView = Backbone.View.extend({
+  Drupal.quickedit.ContextualLinkView = Backbone.View.extend({
 
      events: function () {
       // Prevents delay and simulated mouse events.
@@ -29,8 +29,8 @@
      *
      * @param Object options
      *   An object with the following keys:
-     *   - Drupal.edit.EntityModel model: the associated entity's model
-     *   - Drupal.edit.AppModel appModel: the application state model
+     *   - Drupal.quickedit.EntityModel model: the associated entity's model
+     *   - Drupal.quickedit.AppModel appModel: the application state model
      *   - strings: the strings for the "Quick edit" link
      */
     initialize: function (options) {

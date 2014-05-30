@@ -4,43 +4,43 @@
  * @file
  * Defines the "form" in-place editor.
  *
- * @see Drupal 8's \Drupal\edit\Plugin\InPlaceEditor\FormEditor.
+ * @see Drupal 8's \Drupal\quickedit\Plugin\InPlaceEditor\FormEditor.
  */
 
-module_load_include('php', 'edit', 'includes/EditInPlaceEditorInterface');
+module_load_include('php', 'quickedit', 'includes/QuickEditInPlaceEditorInterface');
 
 /**
  * Defines the form in-place editor.
  */
-class FormEditor implements EditInPlaceEditorInterface{
+class FormEditor implements QuickEditInPlaceEditorInterface{
 
   /**
-   * Implements EditInPlaceEditorInterface::isCompatible().
+   * Implements QuickEditInPlaceEditorInterface::isCompatible().
    *
-   * @see Drupal 8's \Drupal\edit\Plugin\InPlaceEditor\FormEditor::isCompatible().
+   * @see Drupal 8's \Drupal\quickedit\Plugin\InPlaceEditor\FormEditor::isCompatible().
    */
   public function isCompatible(array $instance, array $items) {
     return TRUE;
   }
 
   /**
-   * Implements EditInPlaceEditorInterface::getMetadata().
+   * Implements QuickEditInPlaceEditorInterface::getMetadata().
    *
-   * @see Drupal 8's \Drupal\edit\Plugin\InPlaceEditor\FormEditor::getMetadata().
+   * @see Drupal 8's \Drupal\quickedit\Plugin\InPlaceEditor\FormEditor::getMetadata().
    */
   public function getMetadata(array $instance, array $items) {
     return array();
   }
 
   /**
-   * Implements EditInPlaceEditorInterface::getAttachments().
+   * Implements QuickEditInPlaceEditorInterface::getAttachments().
    *
-   * @see Drupal 8's \Drupal\edit\Plugin\InPlaceEditor\FormEditor::isCompatible().
+   * @see Drupal 8's \Drupal\quickedit\Plugin\InPlaceEditor\FormEditor::isCompatible().
    */
   public function getAttachments() {
     return array(
       'library' => array(
-        array('edit', 'edit.inPlaceEditor.form'),
+        array('quickedit', 'quickedit.inPlaceEditor.form'),
       ),
     );
   }

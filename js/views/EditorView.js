@@ -13,12 +13,12 @@
    * Specific in-place editor implementations should subclass (extend) this View
    * and override whichever method they deem necessary to override.
    *
-   * Look at Drupal.edit.editors.form and Drupal.edit.editors.plain_text for
-   * examples.
+   * Look at Drupal.quickedit.editors.form and
+   * Drupal.quickedit.editors.plain_text for examples.
    *
-   * @see Drupal.edit.EditorModel
+   * @see Drupal.quickedit.EditorModel
    */
-  Drupal.edit.EditorView = Backbone.View.extend({
+  Drupal.quickedit.EditorView = Backbone.View.extend({
 
     /**
      * {@inheritdoc}
@@ -29,14 +29,14 @@
      *
      * If you override this method, you should call this method (the parent
      * class' initialize()) first, like this:
-     *   Drupal.edit.EditorView.prototype.initialize.call(this, options);
+     *   Drupal.quickedit.EditorView.prototype.initialize.call(this, options);
      *
-     * For an example, @see Drupal.edit.editors.plain_text.
+     * For an example, @see Drupal.quickedit.editors.plain_text.
      *
      * @param Object options
      *   An object with the following keys:
-     *   - Drupal.edit.EditorModel model: the in-place editor state model
-     *   - Drupal.edit.FieldModel fieldModel: the field model
+     *   - Drupal.quickedit.EditorModel model: the in-place editor state model
+     *   - Drupal.quickedit.FieldModel fieldModel: the field model
      */
     initialize: function (options) {
       this.fieldModel = options.fieldModel;
@@ -58,12 +58,12 @@
      *
      * For some single cardinality fields, it may be necessary or useful to
      * not in-place edit (and hence decorate) the DOM element with the
-     * data-edit-field-id attribute (which is the field's wrapper), but a specific
-     * element within the field's wrapper.
+     * data-quickedit-field-id attribute (which is the field's wrapper), but a
+     * specific element within the field's wrapper.
      * e.g. using a WYSIWYG editor on a body field should happen on the DOM
      * element containing the text itself, not on the field wrapper.
      *
-     * For example, @see Drupal.edit.editors.plain_text.
+     * For example, @see Drupal.quickedit.editors.plain_text.
      *
      * @return jQuery
      *   A jQuery-wrapped DOM element.
@@ -73,25 +73,27 @@
     },
 
     /**
-     * Returns 3 Edit UI settings that depend on the in-place editor:
+     * Returns 3 Quick Edit UI settings that depend on the in-place editor:
      *  - Boolean padding: indicates whether padding should be applied to the
      *    edited element, to guarantee legibility of text.
      *  - Boolean unifiedToolbar: provides the in-place editor with the ability to
-     *    insert its own toolbar UI into Edit's tightly integrated toolbar.
-     *  - Boolean fullWidthToolbar: indicates whether Edit's tightly integrated
-     *    toolbar should consume the full width of the element, rather than being
-     *    just long enough to accommodate a label.
+     *    insert its own toolbar UI into Quick Edit's tightly integrated =
+     *    toolbar.
+     *  - Boolean fullWidthToolbar: indicates whether Quick Edit's tightly
+     *    integrated toolbar should consume the full width of the element,
+     *    rather than being just long enough to accommodate a label.
      */
-    getEditUISettings: function () {
+    getQuickEditUISettings: function () {
       return { padding: false, unifiedToolbar: false, fullWidthToolbar: false, popup: false };
     },
 
     /**
      * Determines the actions to take given a change of state.
      *
-     * @param Drupal.edit.FieldModel fieldModel
+     * @param Drupal.quickedit.FieldModel fieldModel
      * @param String state
-     *   The state of the associated field. One of Drupal.edit.FieldModel.states.
+     *   The state of the associated field. One of
+     *   Drupal.quickedit.FieldModel.states.
      */
     stateChange: function (fieldModel, state) {
       var from = fieldModel.previous('state');
@@ -178,7 +180,7 @@
     save: function () {
       var fieldModel = this.fieldModel;
       var editorModel = this.model;
-      var backstageId = 'edit_backstage-' + this.fieldModel.id.replace(/[\/\[\]\_\s]/g, '-');
+      var backstageId = 'quickedit_backstage-' + this.fieldModel.id.replace(/[\/\[\]\_\s]/g, '-');
 
       function fillAndSubmitForm (value) {
         var $form = $('#' + backstageId).find('form');
@@ -188,7 +190,7 @@
           // Don't mess with the node summary.
           .not('[name$="\\[summary\\]"]').val(value);
         // Submit the form.
-        $form.find('.edit-form-submit').trigger('click.edit');
+        $form.find('.quickedit-form-submit').trigger('click.quickedit');
       }
 
       var formOptions = {
@@ -206,11 +208,11 @@
       };
 
       var self = this;
-      Drupal.edit.util.form.load(formOptions, function (form, ajax) {
+      Drupal.quickedit.util.form.load(formOptions, function (form, ajax) {
         // Create a backstage area for storing forms that are hidden from view
         // (hence "backstage" — since the editing doesn't happen in the form, it
         // happens "directly" in the content, the form is only used for saving).
-        var $backstage = $(Drupal.theme('editBackstage', { id: backstageId })).appendTo('body');
+        var $backstage = $(Drupal.theme('quickeditBackstage', { id: backstageId })).appendTo('body');
         // Hidden forms are stuffed into the backstage container for this field.
         var $form = $(form).appendTo($backstage);
         // Disable the browser's HTML5 validation; we only care about server-
@@ -218,11 +220,11 @@
         // because browsers don't like to set HTML5 validation errors on hidden
         // forms.)
         $form.prop('novalidate', true);
-        var $submit = $form.find('.edit-form-submit');
-        self.formSaveAjax = Drupal.edit.util.form.ajaxifySaving(formOptions, $submit);
+        var $submit = $form.find('.quickedit-form-submit');
+        self.formSaveAjax = Drupal.quickedit.util.form.ajaxifySaving(formOptions, $submit);
 
         function removeHiddenForm () {
-          Drupal.edit.util.form.unajaxifySaving(self.formSaveAjax);
+          Drupal.quickedit.util.form.unajaxifySaving(self.formSaveAjax);
           delete self.formSaveAjax;
           $backstage.remove();
         }
@@ -231,7 +233,7 @@
         self.formSaveAjax.commands = {};
 
         // Successfully saved.
-        self.formSaveAjax.commands.editFieldFormSaved = function (ajax, response, status) {
+        self.formSaveAjax.commands.quickeditFieldFormSaved = function (ajax, response, status) {
           removeHiddenForm();
           // First, transition the state to 'saved'. Also set the
           // 'htmlForOtherViewModes' attribute, so that when this field is
@@ -247,18 +249,19 @@
         };
 
         // Unsuccessfully saved; validation errors.
-        self.formSaveAjax.commands.editFieldFormValidationErrors = function (ajax, response, status) {
+        self.formSaveAjax.commands.quickeditFieldFormValidationErrors = function (ajax, response, status) {
           removeHiddenForm();
           editorModel.set('validationErrors', response.data);
           fieldModel.set('state', 'invalid');
         };
 
-        // The editFieldForm AJAX command is only called upon loading the form
-        // for the first time, and when there are validation errors in the form;
-        // Form API then marks which form items have errors. This is useful for
-        // the form-based in-place editor, but pointless for any other: the form
-        // itself won't be visible at all anyway! So, we just ignore it.
-        self.formSaveAjax.commands.editFieldForm = function () {};
+        // The quickeditFieldForm AJAX command is only called upon loading the
+        // form for the first time, and when there are validation errors in the
+        // form; Form API then marks which form items have errors. This is
+        // useful for the form-based in-place editor, but pointless for any
+        // other: the form itself won't be visible at all anyway! So, we just
+        // ignore it.
+        self.formSaveAjax.commands.quickeditFieldForm = function () {};
 
         fillAndSubmitForm(editorModel.get('currentValue'));
       });
@@ -270,10 +273,10 @@
      * Should be called when the state is changed to 'invalid'.
      */
     showValidationErrors: function () {
-      var $errors = $('<div class="edit-validation-errors"></div>')
+      var $errors = $('<div class="quickedit-validation-errors"></div>')
         .append(this.model.get('validationErrors'));
       this.getEditedElement()
-        .addClass('edit-validation-error')
+        .addClass('quickedit-validation-error')
         .after($errors);
     },
 
@@ -287,8 +290,8 @@
      */
     removeValidationErrors: function () {
       this.getEditedElement()
-        .removeClass('edit-validation-error')
-        .next('.edit-validation-errors')
+        .removeClass('quickedit-validation-error')
+        .next('.quickedit-validation-errors')
         .remove();
     }
 

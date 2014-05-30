@@ -2,15 +2,15 @@
 
 /**
  * @file
- * Contains Edit's InPlaceEditorInterface.
+ * Contains Quick Edit's InPlaceEditorInterface.
  *
- * @see Drupal 8's \Drupal\edit\Plugin\InPlaceEditorInterface.
+ * @see Drupal 8's \Drupal\quickedit\Plugin\InPlaceEditorInterface.
  */
 
 /**
  * Defines an interface for in-place editors plugins.
  */
-interface EditInPlaceEditorInterface {
+interface QuickEditInPlaceEditorInterface {
 
   /**
    * Checks whether this in-place editor is compatible with a given field.
@@ -28,7 +28,7 @@ interface EditInPlaceEditorInterface {
   /**
    * Generates metadata that is needed specifically for this editor.
    *
-   * Will only be called by EditMetadataGeneratorInterface::generate()
+   * Will only be called by QuickEditMetadataGeneratorInterface::generate()
    * when the passed in field instance & item values will use this in-place
    * editor.
    *

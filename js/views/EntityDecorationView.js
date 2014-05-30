@@ -7,7 +7,7 @@
 
   "use strict";
 
-  Drupal.edit.EntityDecorationView = Backbone.View.extend({
+  Drupal.quickedit.EntityDecorationView = Backbone.View.extend({
 
     /**
      * {@inheritdoc}
@@ -22,7 +22,7 @@
      * {@inheritdoc}
      */
     render: function () {
-      this.$el.toggleClass('edit-entity-active', this.model.get('isActive'));
+      this.$el.toggleClass('quickedit-entity-active', this.model.get('isActive'));
     },
 
     /**

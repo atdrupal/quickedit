@@ -2,17 +2,17 @@
 
 /**
  * @file
- * Contains' Edit's EditorSelector.
+ * Contains' Quick Edit's EditorSelector.
  *
- * @see Drupal 8's \Drupal\edit\EditorSelector.
+ * @see Drupal 8's \Drupal\quickedit\EditorSelector.
  */
 
-module_load_include('php', 'edit', 'includes/EditEditorSelectorInterface');
+module_load_include('php', 'quickedit', 'includes/QuickEditEditorSelectorInterface');
 
 /**
  * Selects an in-place editor (an Editor plugin) for a field.
  */
-class EditEditorSelector implements EditEditorSelectorInterface {
+class QuickEditEditorSelector implements QuickEditEditorSelectorInterface {
 
   /**
    * A list of alternative editor plugin IDs, keyed by editor plugin ID.
@@ -22,16 +22,16 @@ class EditEditorSelector implements EditEditorSelectorInterface {
   protected $alternatives;
 
   /**
-   * Constructs a new EditEditorSelector.
+   * Constructs a new QuickEditEditorSelector.
    */
   public function __construct() {
   }
 
   /**
-   * Implements EditEditorSelectorInterface::getEditor().
+   * Implements QuickEditEditorSelectorInterface::getEditor().
    */
   public function getEditor($formatter_type, array $instance, array $items) {
-    $editors = edit_editor_list();
+    $editors = quickedit_editor_list();
 
     // Build a static cache of the editors that have registered themselves as
     // alternatives to a certain editor.
@@ -51,7 +51,7 @@ class EditEditorSelector implements EditEditorSelectorInterface {
     // 'form' editor, since that can work for any field. Formatter definitions
     // can use 'disabled' to explicitly opt out of in-place editing.
     $formatter_settings = $formatter_type['settings'];
-    $editor_id = $formatter_settings['edit']['editor'];
+    $editor_id = $formatter_settings['quickedit']['editor'];
     if ($editor_id === 'disabled') {
       return;
     }
@@ -67,7 +67,7 @@ class EditEditorSelector implements EditEditorSelectorInterface {
 
     // Make a choice.
     foreach ($editor_choices as $editor_id) {
-      $editor_plugin = _edit_get_editor_plugin($editor_id);
+      $editor_plugin = _quickedit_get_editor_plugin($editor_id);
       if ($editor_plugin->isCompatible($instance, $items)) {
         return $editor_id;
       }
@@ -78,7 +78,7 @@ class EditEditorSelector implements EditEditorSelectorInterface {
   }
 
   /**
-   * Implements EditEditorSelectorInterface::getEditorAttachments().
+   * Implements QuickEditEditorSelectorInterface::getEditorAttachments().
    */
   public function getEditorAttachments(array $editor_ids) {
     $attachments = array();
@@ -86,10 +86,10 @@ class EditEditorSelector implements EditEditorSelectorInterface {
 
     // Editor plugins' attachments.
     foreach ($editor_ids as $editor_id) {
-      $editor_plugin = _edit_get_editor_plugin($editor_id);
+      $editor_plugin = _quickedit_get_editor_plugin($editor_id);
       $attachments[$editor_id] = $editor_plugin->getAttachments();
       // Allows contrib to declare additional dependencies for the editor.
-      drupal_alter('edit_editor_attachments', $attachments[$editor_id], $editor_id);
+      drupal_alter('quickedit_editor_attachments', $attachments[$editor_id], $editor_id);
     }
 
     return drupal_array_merge_deep_array($attachments);

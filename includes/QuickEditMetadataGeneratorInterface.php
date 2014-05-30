@@ -2,15 +2,15 @@
 
 /**
  * @file
- * Contains Edit's MetadataGeneratorInterface.
+ * Contains Quick Edit's MetadataGeneratorInterface.
  *
- * @see Drupal 8's \Drupal\edit\MetadataGeneratorInterface
+ * @see Drupal 8's \Drupal\quickedit\MetadataGeneratorInterface
  */
 
 /**
  * Interface for generating in-place editing metadata for an entity field.
  */
-interface EditMetadataGeneratorInterface {
+interface QuickEditMetadataGeneratorInterface {
 
   /**
    * Generates in-place editing metadata for an entity.

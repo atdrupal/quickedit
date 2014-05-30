@@ -2,13 +2,13 @@
 
 /**
  * @file
- * Tests loading of Edit and lazy-loading of in-place editors.
+ * Tests loading of Quick Edit and lazy-loading of in-place editors.
  */
 
 /**
- * Tests loading of Edit and lazy-loading of in-place editors.
+ * Tests loading of Quick Edit and lazy-loading of in-place editors.
  */
-class EditLoadingTest extends DrupalWebTestCase {
+class QuickEditLoadingTest extends DrupalWebTestCase {
 
   /**
    * The installation profile to use with this test class.
@@ -21,14 +21,14 @@ class EditLoadingTest extends DrupalWebTestCase {
     return array(
       'name' => 'In-place editing loading',
       'description' => 'Tests loading of in-place editing functionality and lazy loading of its in-place editors.',
-      'group' => 'Edit',
+      'group' => 'Quick Edit',
     );
   }
 
   protected function setUp() {
     // Block module is necessary for regions to show up, and hence for
     // hook_page_build() to be able to #attach something in Drupal 7.
-    parent::setUp(array('block' ,'contextual', 'edit', 'filter', 'node'));
+    parent::setUp(array('block' ,'contextual', 'quickedit', 'filter', 'node'));
 
     // Bartik theme alters comment links, so use a different theme.
     theme_enable(array('bartik'));
@@ -69,7 +69,7 @@ class EditLoadingTest extends DrupalWebTestCase {
   }
 
   /**
-   * Test the loading of Edit when a user doesn't have access to it.
+   * Test the loading of Quick Edit when a user doesn't have access to it.
    */
   public function testUserWithoutPermission() {
     $this->drupalLogin($this->author_user);
@@ -77,17 +77,17 @@ class EditLoadingTest extends DrupalWebTestCase {
 
     // Library and in-place editors.
     $settings = $this->drupalGetSettings();
-    $module_path = drupal_get_path('module', 'edit');
-    $this->assertFalse(isset($settings['ajaxPageState']['js'][$module_path . '/js/edit.js']), 'Edit library not loaded.');
-    $this->assertFalse(isset($settings['ajaxPageState']['js'][$module_path . '/edit/js/editors/formEditor.js']), "'form' in-place editor not loaded.");
+    $module_path = drupal_get_path('module', 'quickedit');
+    $this->assertFalse(isset($settings['ajaxPageState']['js'][$module_path . '/js/quickedit.js']), 'Quick Edit library not loaded.');
+    $this->assertFalse(isset($settings['ajaxPageState']['js'][$module_path . '/quickedit/js/editors/formEditor.js']), "'form' in-place editor not loaded.");
 
     // HTML annotation must always exist (to not break the render cache).
-    $this->assertRaw('data-edit-entity-id="node/1"');
-    $this->assertRaw('data-edit-field-id="node/1/body/und/full"');
+    $this->assertRaw('data-quickedit-entity-id="node/1"');
+    $this->assertRaw('data-quickedit-field-id="node/1/body/und/full"');
 
     // Retrieving the metadata should result in an empty 403 response.
     $post = array('fields[0]' => 'node/1/body/und/full');
-    $response = $this->drupalPostCustom('edit/metadata', 'application/json', $post);
+    $response = $this->drupalPostCustom('quickedit/metadata', 'application/json', $post);
     // @todo: Sadly, Drupal 7 returns HTML when a 403 occurs, no matter what the
     //        Content-Type is. It should be possible to work around this by
     //        moving the access check into the page callback. Question is
@@ -95,11 +95,11 @@ class EditLoadingTest extends DrupalWebTestCase {
     // $this->assertIdentical('{}', $response);
     $this->assertResponse(403);
 
-    // Edit's JavaScript would never hit these endpoints if the metadata was
-    // empty as above, but we need to make sure that malicious users aren't able
-    // to use any of the other endpoints either.
+    // Quick Edit's JavaScript would never hit these endpoints if the metadata
+    // was empty as above, but we need to make sure that malicious users aren't
+    // able to use any of the other endpoints either.
     $post = array('editors[0]' => 'form') + $this->getAjaxPageStatePostData();
-    $response = $this->drupalPostCustom('edit/attachments', 'application/vnd.drupal-ajax', $post);
+    $response = $this->drupalPostCustom('quickedit/attachments', 'application/vnd.drupal-ajax', $post);
     $commands = drupal_json_decode($response);
     $this->assertIdentical(2, count($commands));
     $this->assertIdentical('settings', $commands[0]['command']);
@@ -107,7 +107,7 @@ class EditLoadingTest extends DrupalWebTestCase {
     $this->assertIdentical('You are not authorized to access this page.', $commands[1]['text']);
     $this->assertResponse(200); // 403 in Drupal 8!
     $post = array('nocssjs' => 'true') + $this->getAjaxPageStatePostData();
-    $response = $this->drupalPostCustom('edit/form/' . 'node/1/body/und/full', 'application/vnd.drupal-ajax', $post);
+    $response = $this->drupalPostCustom('quickedit/form/' . 'node/1/body/und/full', 'application/vnd.drupal-ajax', $post);
     $commands = drupal_json_decode($response);
     $this->assertIdentical(2, count($commands));
     $this->assertIdentical('settings', $commands[0]['command']);
@@ -115,14 +115,14 @@ class EditLoadingTest extends DrupalWebTestCase {
     $this->assertIdentical('You are not authorized to access this page.', $commands[1]['text']);
     $this->assertResponse(200); // 403 in Drupal 8!
     $edit = array();
-    $edit['form_id'] = 'edit_field_form';
+    $edit['form_id'] = 'quickedit_field_form';
     $edit['form_token'] = 'xIOzMjuc-PULKsRn_KxFn7xzNk5Bx7XKXLfQfw1qOnA';
     $edit['form_build_id'] = 'form-kVmovBpyX-SJfTT5kY0pjTV35TV-znor--a64dEnMR8';
     $edit['body[0][summary]'] = '';
     $edit['body[0][value]'] = '<p>Malicious content.</p>';
     $edit['body[0][format]'] = 'filtered_html';
     $edit['op'] = t('Save');
-    $response = $this->drupalPostCustom('edit/form/' . 'node/1/body/und/full', 'application/vnd.drupal-ajax', $edit);
+    $response = $this->drupalPostCustom('quickedit/form/' . 'node/1/body/und/full', 'application/vnd.drupal-ajax', $edit);
     $commands = drupal_json_decode($response);
     $this->assertIdentical(2, count($commands));
     $this->assertIdentical('settings', $commands[0]['command']);
@@ -130,7 +130,7 @@ class EditLoadingTest extends DrupalWebTestCase {
     $this->assertIdentical('You are not authorized to access this page.', $commands[1]['text']);
     $this->assertResponse(200); // 403 in Drupal 8!
     $post = array('nocssjs' => 'true');
-    $response = $this->drupalPostCustom('edit/entity/' . 'node/1', 'application/json', $post);
+    $response = $this->drupalPostCustom('quickedit/entity/' . 'node/1', 'application/json', $post);
     $commands = drupal_json_decode($response);
     $this->assertIdentical(2, count($commands));
     $this->assertIdentical('settings', $commands[0]['command']);
@@ -140,7 +140,7 @@ class EditLoadingTest extends DrupalWebTestCase {
   }
 
   /**
-   * Tests the loading of Edit when a user does have access to it.
+   * Tests the loading of Quick Edit when a user does have access to it.
    *
    * Also ensures lazy loading of in-place editors works.
    */
@@ -150,13 +150,13 @@ class EditLoadingTest extends DrupalWebTestCase {
 
     // Library and in-place editors.
     $settings = $this->drupalGetSettings();
-    $module_path = drupal_get_path('module', 'edit');
-    $this->assertTrue(isset($settings['ajaxPageState']['js'][$module_path . '/js/edit.js']), 'Edit library loaded.');
+    $module_path = drupal_get_path('module', 'quickedit');
+    $this->assertTrue(isset($settings['ajaxPageState']['js'][$module_path . '/js/quickedit.js']), 'Quick Edit library loaded.');
     $this->assertFalse(isset($settings['ajaxPageState']['js'][$module_path . '/js/editors/formEditor.js']), "'form' in-place editor not loaded.");
 
     // HTML annotation must always exist (to not break the render cache).
-    $this->assertRaw('data-edit-entity-id="node/1"');
-    $this->assertRaw('data-edit-field-id="node/1/body/und/full"');
+    $this->assertRaw('data-quickedit-entity-id="node/1"');
+    $this->assertRaw('data-quickedit-field-id="node/1/body/und/full"');
 
     // There should be only one revision so far.
     $revisions = node_revision_list(node_load(1));
@@ -166,7 +166,7 @@ class EditLoadingTest extends DrupalWebTestCase {
     // Retrieving the metadata should result in a 200 JSON response.
     $htmlPageDrupalSettings = $this->drupalSettings;
     $post = array('fields[0]' => 'node/1/body/und/full');
-    $response = $this->drupalPostCustom('edit/metadata', 'application/json', $post);
+    $response = $this->drupalPostCustom('quickedit/metadata', 'application/json', $post);
     $this->assertResponse(200);
     $expected = array(
       'node/1/body/und/full' => array(
@@ -185,7 +185,7 @@ class EditLoadingTest extends DrupalWebTestCase {
     //  1. a settings command with useless metadata: AjaxController is dumb
     //  2. an insert command that loads the required in-place editors
     $post = array('editors[0]' => 'form') + $this->getAjaxPageStatePostData();
-    $response = $this->drupalPostCustom('edit/attachments', 'application/vnd.drupal-ajax', $post);
+    $response = $this->drupalPostCustom('quickedit/attachments', 'application/vnd.drupal-ajax', $post);
     $ajax_commands = drupal_json_decode($response);
     $this->assertIdentical(2, count($ajax_commands), 'The attachments HTTP request results in two AJAX commands.');
     // First command: settings.
@@ -202,14 +202,14 @@ class EditLoadingTest extends DrupalWebTestCase {
     $this->assertIdentical($expected, $ajax_commands[1], 'The append command contains the expected data.');
 
     // Retrieving the form for this field should result in a 200 response,
-    // containing only an editFieldForm command.
+    // containing only an quickeditFieldForm command.
     $post = array('nocssjs' => 'true', 'reset' => 'true') + $this->getAjaxPageStatePostData();
-    $response = $this->drupalPostCustom('edit/form/' . 'node/1/body/und/full', 'application/vnd.drupal-ajax', $post);
+    $response = $this->drupalPostCustom('quickedit/form/' . 'node/1/body/und/full', 'application/vnd.drupal-ajax', $post);
     $this->assertResponse(200);
     $ajax_commands = drupal_json_decode($response);
     $this->assertIdentical(1, count($ajax_commands), 'The field form HTTP request results in one AJAX command.');
-    $this->assertIdentical('editFieldForm', $ajax_commands[0]['command'], 'The first AJAX command is an editFieldForm command.');
-    $this->assertIdentical('<form ', drupal_substr($ajax_commands[0]['data'], 0, 6), 'The editFieldForm command contains a form.');
+    $this->assertIdentical('quickeditFieldForm', $ajax_commands[0]['command'], 'The first AJAX command is an editFieldForm command.');
+    $this->assertIdentical('<form ', drupal_substr($ajax_commands[0]['data'], 0, 6), 'The quickeditFieldForm command contains a form.');
 
     // Prepare form values for submission. drupalPostAjaxForm() is not suitable
     // for handling pages with JSON responses, so we need our own solution
@@ -225,7 +225,7 @@ class EditLoadingTest extends DrupalWebTestCase {
         'op' => t('Save'),
       );
       $post = array(
-        'form_id' => 'edit_field_form',
+        'form_id' => 'quickedit_field_form',
         'form_token' => $token_match[1],
         'form_build_id' => $build_id_match[1],
       );
@@ -233,12 +233,12 @@ class EditLoadingTest extends DrupalWebTestCase {
 
       // Submit field form and check response. This should store the updated
       // entity in TempStore on the server.
-      $response = $this->drupalPostCustom('edit/form/' . 'node/1/body/und/full', 'application/vnd.drupal-ajax', $post);
+      $response = $this->drupalPostCustom('quickedit/form/' . 'node/1/body/und/full', 'application/vnd.drupal-ajax', $post);
       $this->assertResponse(200);
       $ajax_commands = drupal_json_decode($response);
       $this->assertIdentical(2, count($ajax_commands), 'The field form HTTP request results in two AJAX commands.');
       $this->assertIdentical('settings', $ajax_commands[0]['command'], 'The first AJAX command is a settings command.');
-      $this->assertIdentical('editFieldFormSaved', $ajax_commands[1]['command'], 'The second AJAX command is an editFieldFormSaved command.');
+      $this->assertIdentical('quickeditFieldFormSaved', $ajax_commands[1]['command'], 'The second AJAX command is an quickeditFieldFormSaved command.');
       $this->assertTrue(strpos($ajax_commands[1]['data'], 'Fine thanks.'), 'Form value saved and printed back.');
       $this->assertIdentical($ajax_commands[1]['other_view_modes'], array(), 'Field was not rendered in any other view mode.');
 
@@ -248,12 +248,12 @@ class EditLoadingTest extends DrupalWebTestCase {
 
       // Save the entity by moving the TempStore values to entity storage.
       $post = array('nocssjs' => 'true');
-      $response = $this->drupalPostCustom('edit/entity/' . 'node/1', 'application/json', $post);
+      $response = $this->drupalPostCustom('quickedit/entity/' . 'node/1', 'application/json', $post);
       $this->assertResponse(200);
       $ajax_commands = drupal_json_decode($response);
       $this->assertIdentical(2, count($ajax_commands), 'The entity submission HTTP request results in two AJAX commands.');
       $this->assertIdentical('settings', $ajax_commands[0]['command'], 'The first AJAX command is a settings command.');
-      $this->assertIdentical('editEntitySaved', $ajax_commands[1]['command'], 'The second AJAX command is an editEntitySaved command.');
+      $this->assertIdentical('quickeditEntitySaved', $ajax_commands[1]['command'], 'The second AJAX command is an quickeditEntitySaved command.');
       $this->assertIdentical($ajax_commands[1]['data']['entity_type'], 'node', 'Saved entity is of type node.');
       $this->assertIdentical($ajax_commands[1]['data']['entity_id'], '1', 'Entity id is 1.');
 
@@ -274,36 +274,36 @@ class EditLoadingTest extends DrupalWebTestCase {
 
       // Retrieve field form.
       $post = array('nocssjs' => 'true', 'reset' => 'true');
-      $response = $this->drupalPostCustom('edit/form/' . 'node/1/body/und/full', 'application/vnd.drupal-ajax', $post);
+      $response = $this->drupalPostCustom('quickedit/form/' . 'node/1/body/und/full', 'application/vnd.drupal-ajax', $post);
       $this->assertResponse(200);
       $ajax_commands = drupal_json_decode($response);
       $this->assertIdentical(1, count($ajax_commands), 'The field form HTTP request results in one AJAX command.');
-      $this->assertIdentical('editFieldForm', $ajax_commands[0]['command'], 'The first AJAX command is an editFieldForm command.');
-      $this->assertIdentical('<form ', drupal_substr($ajax_commands[0]['data'], 0, 6), 'The editFieldForm command contains a form.');
+      $this->assertIdentical('quickeditFieldForm', $ajax_commands[0]['command'], 'The first AJAX command is an quickeditFieldForm command.');
+      $this->assertIdentical('<form ', drupal_substr($ajax_commands[0]['data'], 0, 6), 'The quickeditFieldForm command contains a form.');
 
       // Submit field form.
       preg_match('/\sname="form_token" value="([^"]+)"/', $ajax_commands[0]['data'], $token_match);
       preg_match('/\sname="form_build_id" value="([^"]+)"/', $ajax_commands[0]['data'], $build_id_match);
       $edit['body[und][0][value]'] = '<p>kthxbye</p>';
       $post = array(
-        'form_id' => 'edit_field_form',
+        'form_id' => 'quickedit_field_form',
         'form_token' => $token_match[1],
         'form_build_id' => $build_id_match[1],
       );
       $post += $edit + $this->getAjaxPageStatePostData();
-      $response = $this->drupalPostCustom('edit/form/' . 'node/1/body/und/full', 'application/vnd.drupal-ajax', $post);
+      $response = $this->drupalPostCustom('quickedit/form/' . 'node/1/body/und/full', 'application/vnd.drupal-ajax', $post);
       // @todo Uncomment the below once https://drupal.org/node/2063303 is fixed.
       // $this->assertIdentical('[]', $response);
       $this->assertResponse(200);
       $ajax_commands = drupal_json_decode($response);
       $this->assertIdentical(2, count($ajax_commands), 'The field form HTTP request results in two AJAX commands.');
       $this->assertIdentical('settings', $ajax_commands[0]['command'], 'The first AJAX command is a settings command.');
-      $this->assertIdentical('editFieldFormSaved', $ajax_commands[1]['command'], 'The second AJAX command is an editFieldFormSaved command.');
+      $this->assertIdentical('quickeditFieldFormSaved', $ajax_commands[1]['command'], 'The second AJAX command is an quickeditFieldFormSaved command.');
       $this->assertTrue(strpos($ajax_commands[1]['data'], 'kthxbye'), 'Form value saved and printed back.');
 
       // Save the entity.
       $post = array('nocssjs' => 'true');
-      $response = $this->drupalPostCustom('edit/entity/' . 'node/1', 'application/json', $post);
+      $response = $this->drupalPostCustom('quickedit/entity/' . 'node/1', 'application/json', $post);
       // @todo Uncomment the below once https://drupal.org/node/2063303 is fixed.
       // $this->assertIdentical('[]', $response);
       $this->assertResponse(200);
@@ -317,7 +317,7 @@ class EditLoadingTest extends DrupalWebTestCase {
   }
 
   /**
-   * Tests the loading of Edit for the title base field.
+   * Tests the loading of Quick Edit for the title base field.
    */
   public function testTitleBaseField() {
     $this->drupalLogin($this->editor_user);
@@ -326,7 +326,7 @@ class EditLoadingTest extends DrupalWebTestCase {
     // Retrieving the metadata should result in a 200 JSON response.
     $htmlPageDrupalSettings = $this->drupalSettings;
     $post = array('fields[0]' => 'node/1/title/und/full');
-    $response = $this->drupalPostCustom('edit/metadata', 'application/json', $post);
+    $response = $this->drupalPostCustom('quickedit/metadata', 'application/json', $post);
     $this->assertResponse(200);
     $expected = array(
       'node/1/title/und/full' => array(
@@ -342,14 +342,14 @@ class EditLoadingTest extends DrupalWebTestCase {
     $this->drupalSettings = $htmlPageDrupalSettings;
 
     // Retrieving the form for this field should result in a 200 response,
-    // containing only an editFieldForm command.
+    // containing only an quickeditFieldForm command.
     $post = array('nocssjs' => 'true', 'reset' => 'true') + $this->getAjaxPageStatePostData();
-    $response = $this->drupalPostCustom('edit/form/' . 'node/1/title/und/full', 'application/vnd.drupal-ajax', $post);
+    $response = $this->drupalPostCustom('quickedit/form/' . 'node/1/title/und/full', 'application/vnd.drupal-ajax', $post);
     $this->assertResponse(200);
     $ajax_commands = drupal_json_decode($response);
     $this->assertIdentical(1, count($ajax_commands), 'The field form HTTP request results in one AJAX command.');
-    $this->assertIdentical('editFieldForm', $ajax_commands[0]['command'], 'The first AJAX command is an editFieldForm command.');
-    $this->assertIdentical('<form ', drupal_substr($ajax_commands[0]['data'], 0, 6), 'The editFieldForm command contains a form.');
+    $this->assertIdentical('quickeditFieldForm', $ajax_commands[0]['command'], 'The first AJAX command is an quickeditFieldForm command.');
+    $this->assertIdentical('<form ', drupal_substr($ajax_commands[0]['data'], 0, 6), 'The quickeditFieldForm command contains a form.');
 
     // Prepare form values for submission. drupalPostAjaxForm() is not suitable
     // for handling pages with JSON responses, so we need our own solution
@@ -363,7 +363,7 @@ class EditLoadingTest extends DrupalWebTestCase {
         'op' => t('Save'),
       );
       $post = array(
-        'form_id' => 'edit_field_form',
+        'form_id' => 'quickedit_field_form',
         'form_token' => $token_match[1],
         'form_build_id' => $build_id_match[1],
       );
@@ -371,12 +371,12 @@ class EditLoadingTest extends DrupalWebTestCase {
 
       // Submit field form and check response. This should store the
       // updated entity in TempStore on the server.
-      $response = $this->drupalPostCustom('edit/form/' . 'node/1/title/und/full', 'application/vnd.drupal-ajax', $post);
+      $response = $this->drupalPostCustom('quickedit/form/' . 'node/1/title/und/full', 'application/vnd.drupal-ajax', $post);
       $this->assertResponse(200);
       $ajax_commands = drupal_json_decode($response);
       $this->assertIdentical(2, count($ajax_commands), 'The field form HTTP request results in two AJAX commands.');
       $this->assertIdentical('settings', $ajax_commands[0]['command'], 'The first AJAX command is a settings command.');
-      $this->assertIdentical('editFieldFormSaved', $ajax_commands[1]['command'], 'The second AJAX command is an editFieldFormSaved command.');
+      $this->assertIdentical('quickeditFieldFormSaved', $ajax_commands[1]['command'], 'The second AJAX command is an quickeditFieldFormSaved command.');
       $this->assertTrue(strpos($ajax_commands[1]['data'], 'Obligatory question'), 'Form value saved and printed back.');
 
       // Ensure the text on the original node did not change yet.
@@ -385,12 +385,12 @@ class EditLoadingTest extends DrupalWebTestCase {
 
       // Save the entity by moving the TempStore values to entity storage.
       $post = array('nocssjs' => 'true');
-      $response = $this->drupalPostCustom('edit/entity/' . 'node/1', 'application/json', $post);
+      $response = $this->drupalPostCustom('quickedit/entity/' . 'node/1', 'application/json', $post);
       $this->assertResponse(200);
       $ajax_commands = drupal_json_decode($response);
       $this->assertIdentical(2, count($ajax_commands), 'The entity submission HTTP request results in two AJAX commands.');
       $this->assertIdentical('settings', $ajax_commands[0]['command'], 'The first AJAX command is a settings command.');
-      $this->assertIdentical('editEntitySaved', $ajax_commands[1]['command'], 'The second AJAX command is an editEntitySaved command.');
+      $this->assertIdentical('quickeditEntitySaved', $ajax_commands[1]['command'], 'The second AJAX command is an quickeditEntitySaved command.');
       $this->assertIdentical($ajax_commands[1]['data']['entity_type'], 'node', 'Saved entity is of type node.');
       $this->assertIdentical($ajax_commands[1]['data']['entity_id'], '1', 'Entity id is 1.');
 
@@ -401,7 +401,7 @@ class EditLoadingTest extends DrupalWebTestCase {
   }
 
   /**
-   * Tests that Edit doesn't make fields rendered with display options editable.
+   * Tests that Quick Edit doesn't make fields rendered with display options editable.
    */
   public function testDisplayOptions() {
     $node = node_load('1');
@@ -410,16 +410,16 @@ class EditLoadingTest extends DrupalWebTestCase {
     );
     $build = field_view_field('node', $node, 'body', $display_settings);
     $output = drupal_render($build);
-    $this->assertFalse(strpos($output, 'data-edit-field-id'), 'data-edit-field-id attribute not added when rendering field using dynamic display options.');
+    $this->assertFalse(strpos($output, 'data-quickedit-field-id'), 'data-quickedit-field-id attribute not added when rendering field using dynamic display options.');
   }
 
   /**
-   * Tests that Edit works with custom render pipelines.
+   * Tests that Quick Edit works with custom render pipelines.
    */
   public function testCustomPipeline() {
-    module_enable(array('edit_test'));
+    module_enable(array('quickedit_test'));
 
-    $custom_render_url = 'edit/form/node/1/body/und/edit_test-custom-render-data';
+    $custom_render_url = 'quickedit/form/node/1/body/und/quickedit_test-custom-render-data';
     $this->drupalLogin($this->editor_user);
 
     // Request editing to render results with the custom render pipeline.
@@ -434,7 +434,7 @@ class EditLoadingTest extends DrupalWebTestCase {
 
     if ($form_tokens_found) {
       $post = array(
-        'form_id' => 'edit_field_form',
+        'form_id' => 'quickedit_field_form',
         'form_token' => $token_match[1],
         'form_build_id' => $build_id_match[1],
         'body[und][0][summary]' => '',
@@ -453,24 +453,24 @@ class EditLoadingTest extends DrupalWebTestCase {
       $ajax_commands = drupal_json_decode($response);
       $this->assertIdentical(2, count($ajax_commands), 'The field form HTTP request results in two AJAX commands.');
       $this->assertIdentical('settings', $ajax_commands[0]['command'], 'The first AJAX command is a settings command.');
-      $this->assertIdentical('editFieldFormSaved', $ajax_commands[1]['command'], 'The second AJAX command is an editFieldFormSaved command.');
+      $this->assertIdentical('quickeditFieldFormSaved', $ajax_commands[1]['command'], 'The second AJAX command is an quickeditFieldFormSaved command.');
       $this->assertTrue(strpos($ajax_commands[1]['data'], 'Fine thanks.'), 'Form value saved and printed back.');
-      $this->assertTrue(strpos($ajax_commands[1]['data'], '<div class="edit-test-wrapper">') !== FALSE, 'Custom render pipeline used to render the value.');
+      $this->assertTrue(strpos($ajax_commands[1]['data'], '<div class="quickedit-test-wrapper">') !== FALSE, 'Custom render pipeline used to render the value.');
       $this->assertIdentical(array_keys($ajax_commands[1]['other_view_modes']), array('full'), 'Field was also rendered in the "full" view mode.');
       $this->assertTrue(strpos($ajax_commands[1]['other_view_modes']['full'], 'Fine thanks.'), '"full" version of field contains the form value.');
     }
   }
 
   /**
-   * Tests Edit with concurrent node / Edit use.
+   * Tests Quick Edit with concurrent node / Quick Edit use.
    */
   function testConcurrentEdit() {
     $this->drupalLogin($this->editor_user);
 
     // Retrieving the form for this field should result in a 200 response,
-    // containing only an editFieldForm command.
+    // containing only an quickeditFieldForm command.
     $post = array('nocssjs' => 'true', 'reset' => 'true') + $this->getAjaxPageStatePostData();
-    $response = $this->drupalPostCustom('edit/form/' . 'node/1/body/und/full', 'application/vnd.drupal-ajax', $post);
+    $response = $this->drupalPostCustom('quickedit/form/' . 'node/1/body/und/full', 'application/vnd.drupal-ajax', $post);
     $this->assertResponse(200);
     $ajax_commands = drupal_json_decode($response);
 
@@ -482,7 +482,7 @@ class EditLoadingTest extends DrupalWebTestCase {
 
     if ($form_tokens_found) {
       $post = array();
-      $post['form_id'] = 'edit_field_form';
+      $post['form_id'] = 'quickedit_field_form';
       $post['form_token'] = $token_match[1];
       $post['form_build_id'] = $build_id_match[1];
       $post['body[und][0][summary]'] = '';
@@ -498,12 +498,12 @@ class EditLoadingTest extends DrupalWebTestCase {
       // Submit field form and check response. Should throw a validation error
       // because the node was changed in the meantime.
       // $response = $this->submitFieldForm('node/1/body/und/full', $edit);
-      $response = $this->drupalPostCustom('edit/form/' . 'node/1/body/und/full', 'application/vnd.drupal-ajax', $post);
+      $response = $this->drupalPostCustom('quickedit/form/' . 'node/1/body/und/full', 'application/vnd.drupal-ajax', $post);
       $this->assertResponse(200);
       $ajax_commands = drupal_json_decode($response);
       $this->assertIdentical(2, count($ajax_commands), 'The field form HTTP request results in two AJAX commands.');
       $this->assertIdentical('settings', $ajax_commands[0]['command'], 'The first AJAX command is a settings command.');
-      $this->assertIdentical('editFieldFormValidationErrors', $ajax_commands[1]['command'], 'The second AJAX command is an editFieldFormValidationErrors command.');
+      $this->assertIdentical('quickeditFieldFormValidationErrors', $ajax_commands[1]['command'], 'The second AJAX command is an quickeditFieldFormValidationErrors command.');
       $this->assertTrue(strpos($ajax_commands[1]['data'], t('The copy of the content being edited is outdated. Reload the page to edit an up-to-date version.')), 'Error message returned to user.');
     }
   }

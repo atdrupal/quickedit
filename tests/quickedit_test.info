@@ -1,0 +1,5 @@
+name = Quick Edit test
+description = 'Support module for the Quick Edit module tests.'
+package = Spark
+core = 7.x
+hidden = TRUE

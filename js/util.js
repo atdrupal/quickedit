@@ -1,16 +1,16 @@
 /**
  * @file
- * Provides utility functions for Edit.
+ * Provides utility functions for Quick Edit.
  */
 
 (function ($, Drupal, drupalSettings) {
 
   "use strict";
 
-  Drupal.edit.util = Drupal.edit.util || {};
+  Drupal.quickedit.util = Drupal.quickedit.util || {};
 
-  Drupal.edit.util.constants = {};
-  Drupal.edit.util.constants.transitionEnd = "transitionEnd.edit webkitTransitionEnd.edit transitionend.edit msTransitionEnd.edit oTransitionEnd.edit";
+  Drupal.quickedit.util.constants = {};
+  Drupal.quickedit.util.constants.transitionEnd = "transitionEnd.quickedit webkitTransitionEnd.quickedit transitionend.quickedit msTransitionEnd.quickedit oTransitionEnd.quickedit";
 
   /**
    * Converts a field id into a formatted url path.
@@ -19,9 +19,9 @@
    *   The id of an editable field. For example, 'node/1/body/und/full'.
    * @param String urlFormat
    *   The Controller route for field processing. For example,
-   *   '/edit/form/%21entity_type/%21id/%21field_name/%21langcode/%21view_mode'.
+   *   '/quickedit/form/%21entity_type/%21id/%21field_name/%21langcode/%21view_mode'.
    */
-  Drupal.edit.util.buildUrl = function (id, urlFormat) {
+  Drupal.quickedit.util.buildUrl = function (id, urlFormat) {
     var parts = id.split('/');
     return Drupal.formatString(decodeURIComponent(urlFormat), {
       '!entity_type': parts[0],
@@ -40,16 +40,16 @@
    * @param String message
    *   The message to use in the modal dialog.
    */
-  Drupal.edit.util.networkErrorModal = function (title, message) {
-    var networkErrorModal = new Drupal.edit.ModalView({
+  Drupal.quickedit.util.networkErrorModal = function (title, message) {
+    var networkErrorModal = new Drupal.quickedit.ModalView({
       title: title,
-      dialogClass: 'edit-network-error',
+      dialogClass: 'quickedit-network-error',
       message: message,
       buttons: [
         {
           action: 'ok',
           type: 'submit',
-          classes: 'action-save edit-button',
+          classes: 'action-save quickedit-button',
           label: Drupal.t('OK')
         }
       ],
@@ -58,7 +58,7 @@
     networkErrorModal.render();
   };
 
-  Drupal.edit.util.form = {
+  Drupal.quickedit.util.form = {
 
     /**
      * Loads a form, calls a callback to insert.
@@ -87,24 +87,24 @@
 
       // Create a Drupal.ajax instance to load the form.
       var formLoaderAjax = new Drupal.ajax(fieldID, $el, {
-        url: Drupal.edit.util.buildUrl(fieldID, drupalSettings.edit.fieldFormURL),
-        event: 'edit-internal.edit',
+        url: Drupal.quickedit.util.buildUrl(fieldID, drupalSettings.quickedit.fieldFormURL),
+        event: 'quickedit-internal.quickedit',
         submit: {
           nocssjs : options.nocssjs,
           reset : options.reset
         },
         progress: { type : null }, // No progress indicator.
         error: function (xhr, url) {
-          $el.off('edit-internal.edit');
+          $el.off('quickedit-internal.quickedit');
 
           // Show a modal to inform the user of the network error.
-          var fieldLabel = Drupal.edit.metadata.get(fieldID, 'label');
+          var fieldLabel = Drupal.quickedit.metadata.get(fieldID, 'label');
           var message = Drupal.t('Could not load the form for <q>@field-label</q>, either due to a website problem or a network connection problem.<br>Please try again.', { '@field-label' : fieldLabel });
-          Drupal.edit.util.networkErrorModal(Drupal.t('Sorry!'), message);
+          Drupal.quickedit.util.networkErrorModal(Drupal.t('Sorry!'), message);
 
           // Change the state back to "candidate", to allow the user to start
           // in-place editing of the field again.
-          var fieldModel = Drupal.edit.app.model.get('activeField');
+          var fieldModel = Drupal.quickedit.app.model.get('activeField');
           fieldModel.set('state', 'candidate');
         }
       });
@@ -114,14 +114,14 @@
       // called, so we must alias any and all of the commands that might be called.
       formLoaderAjax.commands.settings = Drupal.ajax.prototype.commands.settings;
       formLoaderAjax.commands.insert = Drupal.ajax.prototype.commands.insert;
-      // Implement a scoped editFieldForm AJAX command: calls the callback.
-      formLoaderAjax.commands.editFieldForm = function (ajax, response, status) {
+      // Implement a scoped quickeditFieldForm AJAX command: calls the callback.
+      formLoaderAjax.commands.quickeditFieldForm = function (ajax, response, status) {
         callback(response.data, ajax);
-        $el.off('edit-internal.edit');
+        $el.off('quickedit-internal.quickedit');
         formLoaderAjax = null;
       };
-      // This will ensure our scoped editFieldForm AJAX command gets called.
-      $el.trigger('edit-internal.edit');
+      // This will ensure our scoped quickeditFieldForm AJAX command gets called.
+      $el.trigger('quickedit-internal.quickedit');
     },
 
     /**
@@ -141,7 +141,7 @@
       var settings = {
         url: $submit.closest('form').attr('action'),
         setClick: true,
-        event: 'click.edit',
+        event: 'click.quickedit',
         progress: { type: null },
         submit: {
           nocssjs : options.nocssjs,
@@ -165,10 +165,10 @@
      * Cleans up the Drupal.ajax instance that is used to save the form.
      *
      * @param Drupal.ajax ajax
-     *   A Drupal.ajax that was returned by Drupal.edit.form.ajaxifySaving().
+     *   A Drupal.ajax that was returned by Drupal.quickedit.form.ajaxifySaving().
      */
     unajaxifySaving: function (ajax) {
-      $(ajax.element).off('click.edit');
+      $(ajax.element).off('click.quickedit');
     }
 
   };
@@ -196,7 +196,7 @@
    *
    * @see Drupal 8's core/misc/debounce.js.
    */
-  Drupal.edit.util.debounce = function (func, wait, immediate) {
+  Drupal.quickedit.util.debounce = function (func, wait, immediate) {
     var timeout, result;
     return function () {
       var context = this;

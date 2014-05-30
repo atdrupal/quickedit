@@ -7,7 +7,7 @@
 
   "use strict";
 
-  Drupal.edit.FieldToolbarView = Backbone.View.extend({
+  Drupal.quickedit.FieldToolbarView = Backbone.View.extend({
 
     // The edited element, as indicated by EditorView.getEditedElement().
     $editedElement: null,
@@ -26,7 +26,7 @@
       this.$root = this.$el;
 
       // Generate a DOM-compatible ID for the form container DOM element.
-      this._id = 'edit-toolbar-for-' + this.model.id.replace(/[\/\[\]]/g, '_');
+      this._id = 'quickedit-toolbar-for-' + this.model.id.replace(/[\/\[\]]/g, '_');
 
       this.listenTo(this.model, 'change:state', this.stateChange)
     },
@@ -36,7 +36,7 @@
      */
     render: function () {
       // Render toolbar and set it as the view's element.
-      this.setElement($(Drupal.theme('editFieldToolbar', {
+      this.setElement($(Drupal.theme('quickeditFieldToolbar', {
         id: this._id
       })));
 
@@ -49,9 +49,10 @@
     /**
      * Determines the actions to take given a change of state.
      *
-     * @param Drupal.edit.FieldModel model
+     * @param Drupal.quickedit.FieldModel model
      * @param String state
-     *   The state of the associated field. One of Drupal.edit.FieldModel.states.
+     *   The state of the associated field. One of
+     *   Drupal.quickedit.FieldModel.states.
      */
     stateChange: function (model, state) {
       var from = model.previous('state');
@@ -73,11 +74,11 @@
         case 'activating':
           this.render();
 
-          if (this.editorView.getEditUISettings().fullWidthToolbar) {
-            this.$el.addClass('edit-toolbar-fullwidth');
+          if (this.editorView.getQuickEditUISettings().fullWidthToolbar) {
+            this.$el.addClass('quickedit-toolbar-fullwidth');
           }
 
-          if (this.editorView.getEditUISettings().unifiedToolbar) {
+          if (this.editorView.getQuickEditUISettings().unifiedToolbar) {
             this.insertWYSIWYGToolGroups();
           }
           break;
@@ -99,14 +100,14 @@
      */
     insertWYSIWYGToolGroups: function () {
       this.$el
-        .append(Drupal.theme('editToolgroup', {
+        .append(Drupal.theme('quickeditToolgroup', {
           id: this.getFloatedWysiwygToolgroupId(),
-          classes: ['wysiwyg-floated', 'edit-animate-slow', 'edit-animate-invisible', 'edit-animate-delay-veryfast'],
+          classes: ['wysiwyg-floated', 'quickedit-animate-slow', 'quickedit-animate-invisible', 'quickedit-animate-delay-veryfast'],
           buttons: []
         }))
-        .append(Drupal.theme('editToolgroup', {
+        .append(Drupal.theme('quickeditToolgroup', {
           id: this.getMainWysiwygToolgroupId(),
-          classes: ['wysiwyg-main', 'edit-animate-slow', 'edit-animate-invisible', 'edit-animate-delay-veryfast'],
+          classes: ['wysiwyg-main', 'quickedit-animate-slow', 'quickedit-animate-invisible', 'quickedit-animate-delay-veryfast'],
           buttons: []
         }));
 
@@ -124,7 +125,7 @@
      *   A string that can be used as the ID for this toolbar's container.
      */
     getId: function () {
-      return 'edit-toolbar-for-' + this._id;
+      return 'quickedit-toolbar-for-' + this._id;
     },
 
     /**
@@ -136,7 +137,7 @@
      *   A string that can be used as the ID.
      */
     getFloatedWysiwygToolgroupId: function () {
-      return 'edit-wysiwyg-floated-toolgroup-for-' + this._id;
+      return 'quickedit-wysiwyg-floated-toolgroup-for-' + this._id;
     },
 
     /**
@@ -148,7 +149,7 @@
      *   A string that can be used as the ID.
      */
     getMainWysiwygToolgroupId: function () {
-      return 'edit-wysiwyg-main-toolgroup-for-' + this._id;
+      return 'quickedit-wysiwyg-main-toolgroup-for-' + this._id;
     },
 
     /**
@@ -159,7 +160,7 @@
      * @return jQuery
      */
     _find: function (toolgroup) {
-      return this.$el.find('.edit-toolgroup.' + toolgroup);
+      return this.$el.find('.quickedit-toolgroup.' + toolgroup);
     },
 
     /**
@@ -172,14 +173,14 @@
       var $group = this._find(toolgroup);
       // Attach a transitionEnd event handler to the toolbar group so that update
       // events can be triggered after the animations have ended.
-      $group.on(Drupal.edit.util.constants.transitionEnd, function (event) {
-        $group.off(Drupal.edit.util.constants.transitionEnd);
+      $group.on(Drupal.quickedit.util.constants.transitionEnd, function (event) {
+        $group.off(Drupal.quickedit.util.constants.transitionEnd);
       });
       // The call to remove the class and start the animation must be started in
       // the next animation frame or the event handler attached above won't be
       // triggered.
       window.setTimeout(function () {
-        $group.removeClass('edit-animate-invisible');
+        $group.removeClass('quickedit-animate-invisible');
       }, 0);
      }
 

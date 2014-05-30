@@ -1,9 +1,9 @@
-name = Edit
+name = Quick Edit
 description = In-place content editing.
 package = Spark
 core = 7.x
 
-files[] = tests/edit_loading.test
+files[] = tests/quickedit_loading.test
 
 dependencies[] = contextual
 dependencies[] = entity

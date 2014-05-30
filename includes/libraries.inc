@@ -6,7 +6,7 @@
  */
 
 /**
- * Determines the version of an Edit library.
+ * Determines the version of an Quick Edit library.
  *
  * This is used in case different variants of the library are shipped separately
  * and, thus, different variants can contain different versions.
@@ -22,7 +22,7 @@
  *     variant name.
  *
  */
-function _edit_libraries_get_version(&$library, $options = array()) {
+function _quickedit_libraries_get_version(&$library, $options = array()) {
   $versions = array();
   foreach ($library['variant order'] as $variant_name) {
     $variant = $library['version arguments']['variants'][$variant_name];
@@ -37,7 +37,7 @@ function _edit_libraries_get_version(&$library, $options = array()) {
   // be loaded. Null values are fine. Either that variant file doesn't exist
   // or id doesn't contain version information. As long as the there is no
   // conflicting version information, the check should pass.
-  $versions = array_filter($versions, '_edit_libraries_filter_null_values');
+  $versions = array_filter($versions, '_quickedit_libraries_filter_null_values');
   $version = array_unique($versions);
   $vcount = count($version);
   if ($vcount == 1) {
@@ -73,14 +73,14 @@ function _edit_libraries_get_version(&$library, $options = array()) {
  * @return boolean
  *   Whether the $item's value is empty or not.
  */
-function _edit_libraries_filter_null_values($item) {
+function _quickedit_libraries_filter_null_values($item) {
   return !empty($item);
 }
 
 /**
  * Libraries API variant callback.
  */
-function _edit_libraries_variant_exists($library, $variant_name, $required_file) {
+function _quickedit_libraries_variant_exists($library, $variant_name, $required_file) {
   return file_exists($library['library path'] . '/' . $required_file);;
 }
 
@@ -93,7 +93,7 @@ function _edit_libraries_variant_exists($library, $variant_name, $required_file)
  * @return Array
  *  Returns a standard Drupal library definition structure.
  */
-function _edit_convert_libraries_to_library($library, $options = array()) {
+function _quickedit_convert_libraries_to_library($library, $options = array()) {
   // If the library wasn't installed, don't bother converting it.
   if (!$library['installed']) {
     return array();
@@ -103,7 +103,7 @@ function _edit_convert_libraries_to_library($library, $options = array()) {
   $files = array();
 
   // Get the library files from one of the installed variants.
-  if ($name = _edit_libraries_get_preferred_variant_name($library)) {
+  if ($name = _quickedit_libraries_get_preferred_variant_name($library)) {
     $files = $library['variants'][$name]['files'];
   }
 
@@ -133,7 +133,7 @@ function _edit_convert_libraries_to_library($library, $options = array()) {
  * @return string
  *   The name of the variant that should be loaded.
  */
-function _edit_libraries_get_preferred_variant_name($library) {
+function _quickedit_libraries_get_preferred_variant_name($library) {
   if (!empty($library['variant order'])) {
     foreach ($library['variant order'] as $name) {
       if ($variant = $library['variants'][$name]) {

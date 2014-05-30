@@ -2,24 +2,24 @@
  * @file
  * A Backbone Model for the state of the in-place editing application.
  *
- * @see Drupal.edit.AppView
+ * @see Drupal.quickedit.AppView
  */
 
 (function (Backbone, Drupal) {
 
   "use strict";
 
-  Drupal.edit.AppModel = Backbone.Model.extend({
+  Drupal.quickedit.AppModel = Backbone.Model.extend({
 
     defaults: {
-      // The currently state = 'highlighted' Drupal.edit.FieldModel, if any.
-      // @see Drupal.edit.FieldModel.states
+      // The currently state = 'highlighted' Drupal.quickedit.FieldModel, if any.
+      // @see Drupal.quickedit.FieldModel.states
       highlightedField: null,
-      // The currently state = 'active' Drupal.edit.FieldModel, if any.
-      // @see Drupal.edit.FieldModel.states
+      // The currently state = 'active' Drupal.quickedit.FieldModel, if any.
+      // @see Drupal.quickedit.FieldModel.states
       activeField: null,
-      // Reference to a Drupal.edit.ModalView instance if a state change requires
-      // confirmation.
+      // Reference to a Drupal.quickedit.ModalView instance if a state change
+      // requires confirmation.
       activeModal: null
     }
 

@@ -10,7 +10,7 @@
   /**
    * State of an in-place editable field in the DOM.
    */
-  Drupal.edit.FieldModel = Drupal.edit.BaseModel.extend({
+  Drupal.quickedit.FieldModel = Drupal.quickedit.BaseModel.extend({
 
     defaults: {
       // The DOM element that represents this field. It may seem bizarre to have
@@ -25,10 +25,10 @@
       // the form "<entity type>/<id>/<field name>/<language>/<view mode>[entity instance ID]",
       // e.g. "node/1/field_tags/und/full[0]".
       id: null,
-      // A Drupal.edit.EntityModel. Its "fields" attribute, which is a
+      // A Drupal.quickedit.EntityModel. Its "fields" attribute, which is a
       // FieldCollection, is automatically updated to include this FieldModel.
       entity: null,
-      // This field's metadata as returned by the EditController::metadata().
+      // This field's metadata as returned by the QuickEditController::metadata().
       metadata: null,
       // Callback function for validating changes between states. Receives the
       // previous state, new state, context, and a callback
@@ -43,7 +43,7 @@
       // during the life of a FieldModel instance.
 
       // In-place editing state of this field. Defaults to the initial state.
-      // Possible values: @see Drupal.edit.FieldModel.states.
+      // Possible values: @see Drupal.quickedit.FieldModel.states.
       state: 'inactive',
       // The field is currently in the 'changed' state or one of the following
       // states in which the field is still changed.
@@ -52,8 +52,8 @@
       // purposes: so that FieldDecorationView.renderChanged() can react to it.
       inTempStore: false,
       // The full HTML representation of this field (with the element that has
-      // the data-edit-field-id as the outer element). Used to propagate changes
-      // from this field instance to other instances of the same field.
+      // the data-quickedit-field-id as the outer element). Used to propagate
+      // changes from this field instance to other instances of the same field.
       html: null,
       // An object containing the full HTML representations (values) of other view
       // modes (keys) of this field, for other instances of this field displayed
@@ -74,8 +74,8 @@
       // Automatically generate the logical field ID.
       this.set('logicalFieldID', this.get('fieldID').split('/').slice(0, 4).join('/'));
 
-      // Call Drupal.edit.BaseModel's initialize() method.
-      Drupal.edit.BaseModel.prototype.initialize.call(this, options);
+      // Call Drupal.quickedit.BaseModel's initialize() method.
+      Drupal.quickedit.BaseModel.prototype.initialize.call(this, options);
     },
 
     /**
@@ -85,7 +85,7 @@
       if (this.get('state') !== 'inactive') {
         throw new Error("FieldModel cannot be destroyed if it is not inactive state.");
       }
-      Drupal.edit.BaseModel.prototype.destroy.call(this, options);
+      Drupal.quickedit.BaseModel.prototype.destroy.call(this, options);
     },
 
     /**
@@ -143,7 +143,7 @@
     findOtherViewModes: function () {
       var currentField = this;
       var otherViewModes = [];
-      Drupal.edit.collections.fields
+      Drupal.quickedit.collections.fields
         // Find all instances of fields that display the same logical field (same
         // entity, same field, just a different instance and maybe a different
         // view mode).
@@ -242,9 +242,9 @@
      * Indicates whether the 'from' state comes before the 'to' state.
      *
      * @param String from
-     *   One of Drupal.edit.FieldModel.states.
+     *   One of Drupal.quickedit.FieldModel.states.
      * @param String to
-     *   One of Drupal.edit.FieldModel.states.
+     *   One of Drupal.quickedit.FieldModel.states.
      * @return Boolean
      */
     followsStateSequence: function (from, to) {
@@ -253,8 +253,8 @@
 
   });
 
-  Drupal.edit.FieldCollection = Backbone.Collection.extend({
-    model: Drupal.edit.FieldModel
+  Drupal.quickedit.FieldCollection = Backbone.Collection.extend({
+    model: Drupal.quickedit.FieldModel
   });
 
 }(_, Backbone, Drupal));

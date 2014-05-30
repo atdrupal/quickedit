@@ -7,7 +7,7 @@
 
   "use strict";
 
-  Drupal.edit.editors.plain_text = Drupal.edit.EditorView.extend({
+  Drupal.quickedit.editors.plain_text = Drupal.quickedit.EditorView.extend({
 
     // Stores the textual DOM element that is being in-place edited.
     $textElement: null,
@@ -16,7 +16,7 @@
      * {@inheritdoc}
      */
     initialize: function (options) {
-      Drupal.edit.EditorView.prototype.initialize.call(this, options);
+      Drupal.quickedit.EditorView.prototype.initialize.call(this, options);
 
       var editorModel = this.model;
       var fieldModel = this.fieldModel;
@@ -99,7 +99,7 @@
     /**
      * {@inheritdoc}
      */
-    getEditUISettings: function () {
+    getQuickEditUISettings: function () {
       return { padding: true, unifiedToolbar: false, fullWidthToolbar: false, popup: false };
     },
 

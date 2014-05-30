@@ -2,7 +2,7 @@
  * @file
  * A Backbone View that controls the overall "in-place editing application".
  *
- * @see Drupal.edit.AppModel
+ * @see Drupal.quickedit.AppModel
  */
 
 (function ($, _, Backbone, Drupal) {
@@ -14,23 +14,23 @@
   // edited fields if in-place editing has been canceled and one or more of the
   // entity's fields were saved to TempStore: one of them may have been changed to
   // the empty value and hencer may have been rerendered as the empty string, which
-  // makes it impossible for Edit to know where to restore the original HTML.
+  // makes it impossible for Quick Edit to know where to restore the original HTML.
   var reload = false;
 
-  Drupal.edit.AppView = Backbone.View.extend({
+  Drupal.quickedit.AppView = Backbone.View.extend({
 
     /**
      * {@inheritdoc}
      *
      * @param Object options
      *   An object with the following keys:
-     *   - Drupal.edit.AppModel model: the application state model
-     *   - Drupal.edit.EntityCollection entitiesCollection: all on-page entities
-     *   - Drupal.edit.FieldCollection fieldsCollection: all on-page fields
+     *   - Drupal.quickedit.AppModel model: the application state model
+     *   - Drupal.quickedit.EntityCollection entitiesCollection: all on-page entities
+     *   - Drupal.quickedit.FieldCollection fieldsCollection: all on-page fields
      */
     initialize: function (options) {
       // AppView's configuration for handling states.
-      // @see Drupal.edit.FieldModel.states
+      // @see Drupal.quickedit.FieldModel.states
       this.activeFieldStates = ['activating', 'active'];
       this.singleFieldStates = ['highlighted', 'activating', 'active'];
       this.changedFieldStates = ['changed', 'saving', 'saved', 'invalid'];
@@ -56,10 +56,10 @@
     /**
      * Handles setup/teardown and state changes when the active entity changes.
      *
-     * @param Drupal.edit.EntityModel entityModel
+     * @param Drupal.quickedit.EntityModel entityModel
      *   An instance of the EntityModel class.
      * @param String state
-     *   The state of the associated field. One of Drupal.edit.EntityModel.states.
+     *   The state of the associated field. One of Drupal.quickedit.EntityModel.states.
      */
     appStateChange: function (entityModel, state) {
       var app = this;
@@ -68,7 +68,7 @@
         case 'launching':
           reload = false;
           // First, create an entity toolbar view.
-          entityToolbarView = new Drupal.edit.EntityToolbarView({
+          entityToolbarView = new Drupal.quickedit.EntityToolbarView({
             model: entityModel,
             appModel: this.model
           });
@@ -117,7 +117,7 @@
      *   The new state.
      * @param null|Object context
      *   The context that is trying to trigger the state change.
-     * @param Drupal.edit.FieldModel fieldModel
+     * @param Drupal.quickedit.FieldModel fieldModel
      *   The fieldModel to which this change applies.
      */
     acceptEditorStateChange: function (from, to, context, fieldModel) {
@@ -135,7 +135,7 @@
         // In general, enforce the states sequence. Disallow going back from a
         // "later" state to an "earlier" state, except in explicitly allowed
         // cases.
-        if (!Drupal.edit.FieldModel.followsStateSequence(from, to)) {
+        if (!Drupal.quickedit.FieldModel.followsStateSequence(from, to)) {
           accept = false;
           // Allow: activating/active -> candidate.
           // Necessary to stop editing a field.
@@ -244,7 +244,7 @@
      *
      * Must happen before the fieldModel's state is changed to 'candidate'.
      *
-     * @param Drupal.edit.FieldModel fieldModel
+     * @param Drupal.quickedit.FieldModel fieldModel
      *   The field for which an in-place editor must be set up.
      */
     setupEditor: function (fieldModel) {
@@ -255,8 +255,8 @@
       var fieldToolbarRoot = entityToolbarView.getToolbarRoot();
       // Create in-place editor.
       var editorName = fieldModel.get('metadata').editor;
-      var editorModel = new Drupal.edit.EditorModel();
-      var editorView = new Drupal.edit.editors[editorName]({
+      var editorModel = new Drupal.quickedit.EditorModel();
+      var editorView = new Drupal.quickedit.editors[editorName]({
         el: $(fieldModel.get('el')),
         model: editorModel,
         fieldModel: fieldModel
@@ -265,7 +265,7 @@
       // Create in-place editor's toolbar for this field — stored inside the
       // entity toolbar, the entity toolbar will position itself appropriately
       // above (or below) the edited element.
-      var toolbarView = new Drupal.edit.FieldToolbarView({
+      var toolbarView = new Drupal.quickedit.FieldToolbarView({
         el: fieldToolbarRoot,
         model: fieldModel,
         $editedElement: $(editorView.getEditedElement()),
@@ -275,7 +275,7 @@
 
       // Create decoration for edited element: padding if necessary, sets classes
       // on the element to style it according to the current state.
-      var decorationView = new Drupal.edit.FieldDecorationView({
+      var decorationView = new Drupal.quickedit.FieldDecorationView({
         el: $(editorView.getEditedElement()),
         model: fieldModel,
         editorView: editorView
@@ -293,7 +293,7 @@
      *
      * Must happen after the fieldModel's state is changed to 'inactive'.
      *
-     * @param Drupal.edit.FieldModel fieldModel
+     * @param Drupal.quickedit.FieldModel fieldModel
      *   The field for which an in-place editor must be torn down.
      */
     teardownEditor: function (fieldModel) {
@@ -349,20 +349,20 @@
 
       // Only instantiate if there isn't a modal instance visible yet.
       if (!this.model.get('activeModal')) {
-        discardDialog = new Drupal.edit.ModalView({
+        discardDialog = new Drupal.quickedit.ModalView({
           title: Drupal.t('Discard changes?'),
-          dialogClass: 'edit-discard-modal',
+          dialogClass: 'quickedit-discard-modal',
           message: Drupal.t('You have unsaved changes'),
           buttons: [
             {
               action: 'save',
               type: 'submit',
-              classes: 'action-save edit-button',
+              classes: 'action-save quickedit-button',
               label: Drupal.t('Save'),
             },
             {
               action: 'discard',
-              classes: 'action-cancel edit-button',
+              classes: 'action-cancel quickedit-button',
               label: Drupal.t('Discard changes'),
             }
           ],
@@ -377,9 +377,9 @@
     /**
      * Reacts to field state changes; tracks global state.
      *
-     * @param Drupal.edit.FieldModel fieldModel
+     * @param Drupal.quickedit.FieldModel fieldModel
      * @param String state
-     *   The state of the associated field. One of Drupal.edit.FieldModel.states.
+     *   The state of the associated field. One of Drupal.quickedit.FieldModel.states.
      */
     editorStateChange: function (fieldModel, state) {
       var from = fieldModel.previous('state');
@@ -409,7 +409,7 @@
     /**
      * Render an updated field (a field whose 'html' attribute changed).
      *
-     * @param Drupal.edit.FieldModel fieldModel
+     * @param Drupal.quickedit.FieldModel fieldModel
      *   The FieldModel whose 'html' attribute changed.
      * @param String html
      *   The updated 'html' attribute.
@@ -463,7 +463,7 @@
     /**
      * Propagates the changes to an updated field to all instances of that field.
      *
-     * @param Drupal.edit.FieldModel updatedField
+     * @param Drupal.quickedit.FieldModel updatedField
      *   The FieldModel whose 'html' attribute changed.
      * @param String html
      *   The updated 'html' attribute.
@@ -473,7 +473,7 @@
      *     occurred because of the propagation of changes to another instance of
      *     this field.
      *
-     * @see Drupal.edit.AppView.renderUpdatedField()
+     * @see Drupal.quickedit.AppView.renderUpdatedField()
      */
     propagateUpdatedField: function (updatedField, html, options) {
       // Don't propagate field updates that themselves were caused by propagation.
@@ -482,7 +482,7 @@
       }
 
       var htmlForOtherViewModes = updatedField.get('htmlForOtherViewModes');
-      Drupal.edit.collections.fields
+      Drupal.quickedit.collections.fields
         // Find all instances of fields that display the same logical field (same
         // entity, same field, just a different instance and maybe a different
         // view mode).
@@ -516,11 +516,11 @@
      *
      * This happens when a field was modified, saved and hence rerendered.
      *
-     * @param Drupal.edit.FieldModel fieldModel
+     * @param Drupal.quickedit.FieldModel fieldModel
      *   A field that was just added to the collection of fields.
      */
     rerenderedFieldToCandidate: function (fieldModel) {
-      var activeEntity = Drupal.edit.collections.entities.findWhere({isActive: true});
+      var activeEntity = Drupal.quickedit.collections.entities.findWhere({isActive: true});
 
       // Early-return if there is no active entity.
       if (!activeEntity) {
@@ -538,7 +538,7 @@
      * EntityModel Collection change handler, called on change:isActive, enforces
      * a single active entity.
      *
-     * @param Drupal.edit.EntityModel
+     * @param Drupal.quickedit.EntityModel
      *   The entityModel instance whose active state has changed.
      */
     enforceSingleActiveEntity: function (changedEntityModel) {

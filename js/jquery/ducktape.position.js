@@ -8,7 +8,7 @@
  *
  * http://api.jqueryui.com/position/
  *
- * NOTE: Modified to live at $.fn.position_edit rather than $.fn.position!
+ * NOTE: Modified to live at $.fn.position_quickedit rather than $.fn.position!
  */
 (function( $, undefined ) {
 
@@ -23,7 +23,7 @@ var cachedScrollbarWidth,
   roffset = /[\+\-]\d+(\.[\d]+)?%?/,
   rposition = /^\w+/,
   rpercent = /%$/,
-  _position = $.fn.position_edit;
+  _position = $.fn.position_quickedit;
 
 function getOffsets( offsets, width, height ) {
   return [
@@ -66,7 +66,7 @@ function getDimensions( elem ) {
   };
 }
 
-$.position_edit = {
+$.position_quickedit = {
   scrollbarWidth: function() {
     if ( cachedScrollbarWidth !== undefined ) {
       return cachedScrollbarWidth;
@@ -97,8 +97,8 @@ $.position_edit = {
       hasOverflowY = overflowY === "scroll" ||
         ( overflowY === "auto" && within.height < within.element[0].scrollHeight );
     return {
-      width: hasOverflowY ? $.position_edit.scrollbarWidth() : 0,
-      height: hasOverflowX ? $.position_edit.scrollbarWidth() : 0
+      width: hasOverflowY ? $.position_quickedit.scrollbarWidth() : 0,
+      height: hasOverflowX ? $.position_quickedit.scrollbarWidth() : 0
     };
   },
   getWithinInfo: function( element ) {
@@ -116,7 +116,7 @@ $.position_edit = {
   }
 };
 
-$.fn.position_edit = function( options ) {
+$.fn.position_quickedit = function( options ) {
   if ( !options || !options.of ) {
     return _position.apply( this, arguments );
   }
@@ -126,8 +126,8 @@ $.fn.position_edit = function( options ) {
 
   var atOffset, targetWidth, targetHeight, targetOffset, basePosition, dimensions,
     target = $( options.of ),
-    within = $.position_edit.getWithinInfo( options.within ),
-    scrollInfo = $.position_edit.getScrollInfo( within ),
+    within = $.position_quickedit.getWithinInfo( options.within ),
+    scrollInfo = $.position_quickedit.getScrollInfo( within ),
     collision = ( options.collision || "flip" ).split( " " ),
     offsets = {};
 
@@ -234,8 +234,8 @@ $.fn.position_edit = function( options ) {
     };
 
     $.each( [ "left", "top" ], function( i, dir ) {
-      if ( $.ui.position_edit[ collision[ i ] ] ) {
-        $.ui.position_edit[ collision[ i ] ][ dir ]( position, {
+      if ( $.ui.position_quickedit[ collision[ i ] ] ) {
+        $.ui.position_quickedit[ collision[ i ] ][ dir ]( position, {
           targetWidth: targetWidth,
           targetHeight: targetHeight,
           elemWidth: elemWidth,
@@ -296,7 +296,7 @@ $.fn.position_edit = function( options ) {
   });
 };
 
-$.ui.position_edit = {
+$.ui.position_quickedit = {
   fit: {
     left: function( position, data ) {
       var within = data.within,
@@ -447,12 +447,12 @@ $.ui.position_edit = {
   },
   flipfit: {
     left: function() {
-      $.ui.position_edit.flip.left.apply( this, arguments );
-      $.ui.position_edit.fit.left.apply( this, arguments );
+      $.ui.position_quickedit.flip.left.apply( this, arguments );
+      $.ui.position_quickedit.fit.left.apply( this, arguments );
     },
     top: function() {
-      $.ui.position_edit.flip.top.apply( this, arguments );
-      $.ui.position_edit.fit.top.apply( this, arguments );
+      $.ui.position_quickedit.flip.top.apply( this, arguments );
+      $.ui.position_quickedit.fit.top.apply( this, arguments );
     }
   }
 };

@@ -3,7 +3,7 @@
 /**
  * @file
  * This is now effectively a light-weight duplicate of FAPE.module, providing
- * just the parts Edit needs.
+ * just the parts Quick Edit needs.
  */
 
 /**
@@ -13,11 +13,11 @@
  *
  * This leverages http://drupal.org/node/1825844.
  *
- * @see edit_field_edit_form_validate()
- * @see edit_field_edit_form_submit()
+ * @see quickedit_field_edit_form_validate()
+ * @see quickedit_field_edit_form_submit()
  * @ingroup forms
  */
-function edit_field_edit_form(&$form, &$form_state, $entity, $field_name) {
+function quickedit_field_edit_form(&$form, &$form_state, $entity, $field_name) {
   $entity_type = $form_state['entity_type'];
   $langcode = $form_state['langcode'];
   $bundle = $form_state['bundle'];
@@ -37,34 +37,34 @@ function edit_field_edit_form(&$form, &$form_state, $entity, $field_name) {
     $entity->log = NULL;
   }
 
-  $form['#validate'][] = 'edit_field_edit_form_validate';
-  $form['#submit'][] = 'edit_field_edit_form_submit';
+  $form['#validate'][] = 'quickedit_field_edit_form_validate';
+  $form['#submit'][] = 'quickedit_field_edit_form_submit';
 }
 
 /**
- * Form validation handler for edit_field_edit_form().
+ * Form validation handler for quickedit_field_edit_form().
  *
- * @see edit_field_edit_form()
- * @see edit_field_edit_form_submit()
- * @see \Drupal\edit\Form\EditFieldForm::validate() in Drupal 8.
+ * @see quickedit_field_edit_form()
+ * @see quickedit_field_edit_form_submit()
+ * @see \Drupal\quickedit\Form\EditFieldForm::validate() in Drupal 8.
  */
-function edit_field_edit_form_validate($form, &$form_state) {
-  $entity = _edit_build_entity($form, $form_state);
+function quickedit_field_edit_form_validate($form, &$form_state) {
+  $entity = _quickedit_build_entity($form, $form_state);
   field_attach_form_validate($form_state['entity_type'], $entity, $form, $form_state, array('field_name' =>  $form_state['field_name']));
 }
 
 /**
- * Form submission handler for edit_field_edit_form().
+ * Form submission handler for quickedit_field_edit_form().
  *
- * @see edit_field_edit_form()
- * @see edit_field_edit_form_validate()
- * @see edit_field_edit()
- * @see \Drupal\edit\Form\EditFieldForm::submit() in Drupal 8.
+ * @see quickedit_field_edit_form()
+ * @see quickedit_field_edit_form_validate()
+ * @see quickedit_field_edit()
+ * @see \Drupal\quickedit\Form\EditFieldForm::submit() in Drupal 8.
  */
-function edit_field_edit_form_submit(&$form, &$form_state) {
-  $entity = _edit_build_entity($form, $form_state);
+function quickedit_field_edit_form_submit(&$form, &$form_state) {
+  $entity = _quickedit_build_entity($form, $form_state);
 
-  _edit_entity_save_to_tempstore($form_state['entity_type'], $form_state['entity_id'], $entity);
+  _quickedit_entity_save_to_tempstore($form_state['entity_type'], $form_state['entity_id'], $entity);
 }
 
 /**
@@ -73,16 +73,16 @@ function edit_field_edit_form_submit(&$form, &$form_state) {
  * Calling code may then validate the returned entity, and if valid, transfer
  * it back to the form state and save it.
  *
- * @see \Drupal\edit\Form\EditFieldForm::buildEntity() in Drupal 8.
+ * @see \Drupal\quickedit\Form\QuickEditFieldForm::buildEntity() in Drupal 8.
  */
-function _edit_build_entity($form, &$form_state) {
+function _quickedit_build_entity($form, &$form_state) {
   $entity = clone $form_state['entity'];
 
   // Extract form values. (Renamed to field_attach_extract_form_values() in D8.)
   field_attach_submit($form_state['entity_type'], $entity, $form, $form_state, array('field_name' =>  $form_state['field_name']));
 
   $instance = field_info_instance($form_state['entity_type'], $form_state['field_name'], $form_state['bundle']);
-  _edit_entity_set_log($entity, $instance['label']);
+  _quickedit_entity_set_log($entity, $instance['label']);
 
   return $entity;
 }
@@ -90,7 +90,7 @@ function _edit_build_entity($form, &$form_state) {
 /**
  * Sets a revision log message for entities configured to create a new revision.
  */
-function _edit_entity_set_log(&$entity, $field_name) {
+function _quickedit_entity_set_log(&$entity, $field_name) {
   if ($entity->revision) {
     $entity->log = t('Updated the %field-name field through in-place editing.', array('%field-name' => $field_name));
   }

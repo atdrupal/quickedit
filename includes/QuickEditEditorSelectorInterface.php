@@ -2,15 +2,15 @@
 
 /**
  * @file
- * Contains Edit's EditorSelectorInterface.
+ * Contains Quick Edit's EditorSelectorInterface.
  *
- * @see Drupal 8's \Drupal\edit\EditorSelectorInterface.
+ * @see Drupal 8's \Drupal\quickedit\EditorSelectorInterface.
  */
 
 /**
  * Interface for selecting an in-place editor (an Editor plugin) for a field.
  */
-interface EditEditorSelectorInterface {
+interface QuickEditEditorSelectorInterface {
 
   /**
    * Returns the in-place editor (an Editor plugin) to use for a field.

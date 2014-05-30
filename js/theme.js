@@ -1,6 +1,6 @@
 /**
  * @file
- * Provides overridable theme functions for all of Edit's client-side HTML.
+ * Provides overridable theme functions for all of Quick Edit's client-side HTML.
  */
 
 (function ($, Drupal) {
@@ -8,7 +8,7 @@
   "use strict";
 
   /**
-   * Theme function for a "backstage" for the Edit module.
+   * Theme function for a "backstage" for the Quick Edit module.
    *
    * @param Object settings
    *   An object with the following keys:
@@ -16,14 +16,14 @@
    * @return String
    *   The corresponding HTML.
    */
-  Drupal.theme.prototype.editBackstage = function (settings) {
+  Drupal.theme.prototype.quickeditBackstage = function (settings) {
     var html = '';
     html += '<div id="' + settings.id + '" />';
     return html;
   };
 
   /**
-   * Theme function for a toolbar container of the Edit module.
+   * Theme function for a toolbar container of the Quick Edit module.
    *
    * @param Object settings
    *   An object with the following keys:
@@ -31,21 +31,21 @@
    * @return String
    *   The corresponding HTML.
    */
-  Drupal.theme.prototype.editEntityToolbar = function (settings) {
+  Drupal.theme.prototype.quickeditEntityToolbar = function (settings) {
     var html = '';
-    html += '<div id="' + settings.id + '" class="edit edit-toolbar-container clearfix">';
-    html += '<i class="edit-toolbar-pointer"></i>';
-    html += '<div class="edit-toolbar-content">';
-    html += '<div class="edit-toolbar edit-toolbar-entity clearfix icon icon-pencil">';
-    html += '<div class="edit-toolbar-label" />';
+    html += '<div id="' + settings.id + '" class="quickedit quickedit-toolbar-container clearfix">';
+    html += '<i class="quickedit-toolbar-pointer"></i>';
+    html += '<div class="quickedit-toolbar-content">';
+    html += '<div class="quickedit-toolbar quickedit-toolbar-entity clearfix icon icon-pencil">';
+    html += '<div class="quickedit-toolbar-label" />';
     html += '</div>';
-    html += '<div class="edit-toolbar edit-toolbar-field clearfix" />';
-    html += '</div><div class="edit-toolbar-lining"></div></div>';
+    html += '<div class="quickedit-toolbar quickedit-toolbar-field clearfix" />';
+    html += '</div><div class="quickedit-toolbar-lining"></div></div>';
     return html;
   };
 
   /**
-   * Theme function for a toolbar container of the Edit module.
+   * Theme function for a toolbar container of the Quick Edit module.
    *
    * @param Object settings
    *   An object with the following keys:
@@ -54,7 +54,7 @@
    * @return String
    *   The corresponding HTML.
    */
-  Drupal.theme.prototype.editEntityToolbarLabel = function (settings) {
+  Drupal.theme.prototype.quickeditEntityToolbarLabel = function (settings) {
     return '<span class="field">' + settings.fieldLabel + '</span>' + settings.entityLabel;
   };
 
@@ -64,12 +64,12 @@
    * @return String
    *   The corresponding HTML.
    */
-  Drupal.theme.prototype.editEntityToolbarFence = function () {
-    return '<div id="edit-toolbar-fence" />';
+  Drupal.theme.prototype.quickeditEntityToolbarFence = function () {
+    return '<div id="quickedit-toolbar-fence" />';
   };
 
   /**
-   * Theme function for a toolbar container of the Edit module.
+   * Theme function for a toolbar container of the Quick Edit module.
    *
    * @param settings
    *   An object with the following keys:
@@ -77,38 +77,38 @@
    * @return
    *   The corresponding HTML.
    */
-  Drupal.theme.prototype.editFieldToolbar = function (settings) {
+  Drupal.theme.prototype.quickeditFieldToolbar = function (settings) {
     return '<div id="' + settings.id + '" />';
   };
 
   /**
-   * Theme function for a toolbar toolgroup of the Edit module.
+   * Theme function for a toolbar toolgroup of the Quick Edit module.
    *
    * @param Object settings
    *   An object with the following keys:
    *   - String id: (optional) the id of the toolgroup
    *   - String classes: the class of the toolgroup.
-   *   - Array buttons: @see Drupal.theme.prototype.editButtons().
+   *   - Array buttons: @see Drupal.theme.prototype.quickeditButtons().
    * @return String
    *   The corresponding HTML.
    */
-  Drupal.theme.prototype.editToolgroup = function (settings) {
+  Drupal.theme.prototype.quickeditToolgroup = function (settings) {
     // Classes.
     var classes = (settings.classes || []);
-    classes.unshift('edit-toolgroup');
+    classes.unshift('quickedit-toolgroup');
     var html = '';
     html += '<div class="' + classes.join(' ') + '"';
     if (settings.id) {
       html += ' id="' + settings.id + '"';
     }
     html += '>';
-    html += Drupal.theme('editButtons', { buttons: settings.buttons });
+    html += Drupal.theme('quickeditButtons', { buttons: settings.buttons });
     html += '</div>';
     return html;
   };
 
   /**
-   * Theme function for buttons of the Edit module.
+   * Theme function for buttons of the Quick Edit module.
    *
    * Can be used for the buttons both in the toolbar toolgroups and in the modal.
    *
@@ -118,11 +118,11 @@
    *     - String type: the type of the button (defaults to 'button')
    *     - Array classes: the classes of the button.
    *     - String label: the label of the button.
-   *     - String action: sets a data-edit-modal-action attribute.
+   *     - String action: sets a data-quickedit-modal-action attribute.
    * @return String
    *   The corresponding HTML.
    */
-  Drupal.theme.prototype.editButtons = function (settings) {
+  Drupal.theme.prototype.quickeditButtons = function (settings) {
     var html = '';
     for (var i = 0; i < settings.buttons.length; i++) {
       var button = settings.buttons[i];
@@ -138,7 +138,7 @@
         }
       }
       html += '<button type="' + button.type + '" class="' + button.classes + '"'  + ' ' + attributes.join(' ');
-      html += ((button.action) ? ' data-edit-modal-action="' + button.action + '"' : '');
+      html += ((button.action) ? ' data-quickedit-modal-action="' + button.action + '"' : '');
       html += '>';
       html += button.label;
       html += '</button>';
@@ -147,7 +147,7 @@
   };
 
   /**
-   * Theme function for a form container of the Edit module.
+   * Theme function for a form container of the Quick Edit module.
    *
    * @param Object settings
    *   An object with the following keys:
@@ -156,10 +156,10 @@
    * @return String
    *   The corresponding HTML.
    */
-  Drupal.theme.prototype.editFormContainer = function (settings) {
+  Drupal.theme.prototype.quickeditFormContainer = function (settings) {
     var html = '';
-    html += '<div id="' + settings.id + '" class="edit-form-container">';
-    html += '  <div class="edit-form">';
+    html += '<div id="' + settings.id + '" class="quickedit-form-container">';
+    html += '  <div class="quickedit-form">';
     html += '    <div class="placeholder">';
     html +=        settings.loadingMsg;
     html += '    </div>';
@@ -169,7 +169,7 @@
   };
 
   /**
-   * Theme function for a modal of the Edit module.
+   * Theme function for a modal of the Quick Edit module.
    *
    * @param Object settings
    *   An object with the following keys:
@@ -179,10 +179,10 @@
    * @return String
    *   The corresponding HTML.
    */
-  Drupal.theme.prototype.editModal = function () {
-    var classes = 'edit-animate-slow edit-animate-invisible edit-animate-delay-veryfast';
+  Drupal.theme.prototype.quickeditModal = function () {
+    var classes = 'quickedit-animate-slow quickedit-animate-invisible quickedit-animate-delay-veryfast';
     var html = '';
-    html += '<div id="edit_modal" class="' + classes + '" role="dialog">';
+    html += '<div id="quickedit_modal" class="' + classes + '" role="dialog">';
     html += '  <div class="main"><p></p></div>';
     html += '  <div class="actions"></div>';
     html += '</div>';

@@ -7,17 +7,17 @@
  * @see Drupal 8's \Drupal\editor\Plugin\InPlaceEditor\Editor.
  */
 
-module_load_include('php', 'edit', 'includes/EditInPlaceEditorInterface');
+module_load_include('php', 'quickedit', 'includes/QuickEditInPlaceEditorInterface');
 
 /**
  * Defines the CKEditor in-place editor.
  */
-class CKEditor implements EditInPlaceEditorInterface{
+class CKEditor implements QuickEditInPlaceEditorInterface{
 
   /**
-   * Implements EditInPlaceEditorInterface::isCompatible().
+   * Implements QuickEditInPlaceEditorInterface::isCompatible().
    *
-   * @see Drupal 8's \Drupal\editor\Plugin\edit\editor\Editor::isCompatible().
+   * @see Drupal 8's \Drupal\editor\Plugin\quickedit\editor\Editor::isCompatible().
    */
   public function isCompatible(array $instance, array $items) {
     $field = field_info_field($instance['field_name']);
@@ -43,9 +43,9 @@ class CKEditor implements EditInPlaceEditorInterface{
   }
 
   /**
-   * Implements EditInPlaceEditorInterface::getMetadata().
+   * Implements QuickEditInPlaceEditorInterface::getMetadata().
    *
-   * @see Drupal 8's \Drupal\editor\Plugin\edit\editor\Editor::getMetadata().
+   * @see Drupal 8's \Drupal\editor\Plugin\quickedit\editor\Editor::getMetadata().
    */
   public function getMetadata(array $instance, array $items) {
     $format_id = $items[0]['format'];
@@ -103,20 +103,20 @@ class CKEditor implements EditInPlaceEditorInterface{
   }
 
   /**
-   * Implements EditInPlaceEditorInterface::getAttachments().
+   * Implements QuickEditInPlaceEditorInterface::getAttachments().
    *
-   * @see Drupal 8's \Drupal\editor\Plugin\edit\editor\Editor::getAttachments().
+   * @see Drupal 8's \Drupal\editor\Plugin\quickedit\editor\Editor::getAttachments().
    */
   public function getAttachments() {
     return array(
       'library' => array(
-        array('edit', 'edit.inPlaceEditor.ckeditor'),
+        array('quickedit', 'quickedit.inPlaceEditor.ckeditor'),
       ),
       'js' => array(
         array(
           'type' => 'setting',
           'data' => array(
-            'edit' => array(
+            'quickedit' => array(
               'ckeditor' => array(
                 'basePath' =>  ckeditor_library_path('relative') . '/ckeditor/',
               ),

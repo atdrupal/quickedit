@@ -9,9 +9,9 @@
   // This value needs to be set before ckeditor.js is loaded (when ckeditor.js
   // is loaded dynamically and when using jQuery <1.9).
   // @see http://bugs.jquery.com/ticket/11795#comment:20
-  window.CKEDITOR_BASEPATH = Drupal.settings.edit.ckeditor.basePath;
+  window.CKEDITOR_BASEPATH = Drupal.settings.quickedit.ckeditor.basePath;
 
-  Drupal.edit.editors.ckeditor = Drupal.edit.EditorView.extend({
+  Drupal.quickedit.editors.ckeditor = Drupal.quickedit.EditorView.extend({
 
     // The CKEditor settings for this field's text format.
     ckeditorSettings: null,
@@ -26,10 +26,10 @@
      * {@inheritdoc}
      */
     initialize: function (options) {
-      Drupal.edit.EditorView.prototype.initialize.call(this, options);
+      Drupal.quickedit.EditorView.prototype.initialize.call(this, options);
 
-      var metadata = Drupal.edit.metadata.get(this.fieldModel.get('fieldID'), 'custom');
-      // @todo use Drupal.settings.edit.ckeditor.editorSettings[this.textFormat] ???
+      var metadata = Drupal.quickedit.metadata.get(this.fieldModel.get('fieldID'), 'custom');
+      // @todo use Drupal.settings.quickedit.ckeditor.editorSettings[this.textFormat] ???
       this.ckeditorSettings = metadata.ckeditorSettings;
       this.textFormatHasTransformations = metadata.formatHasTransformations;
 
@@ -131,7 +131,7 @@
     /**
      * {@inheritdoc}
      */
-    getEditUISettings: function () {
+    getQuickEditUISettings: function () {
       return { padding: true, unifiedToolbar: true, fullWidthToolbar: true, popup: false };
     },
 
@@ -158,23 +158,23 @@
 
       // Create a Drupal.ajax instance to load the form.
       var textLoaderAjax = new Drupal.ajax(fieldID, this.$el, {
-        url: Drupal.edit.util.buildUrl(fieldID, drupalSettings.edit.ckeditor.getUntransformedTextURL),
-        event: 'edit-internal.edit-ckeditor',
+        url: Drupal.quickedit.util.buildUrl(fieldID, drupalSettings.quickedit.ckeditor.getUntransformedTextURL),
+        event: 'quickedit-internal.quickedit-ckeditor',
         submit: { nocssjs : true },
         progress: { type : null } // No progress indicator.
       });
 
       // Work-around for https://drupal.org/node/2019481 in Drupal 7.
       textLoaderAjax.commands = {};
-      // Implement a scoped editCKEditorGetUntransformedText AJAX command: calls
-      // the callback.
-      textLoaderAjax.commands.editCKEditorGetUntransformedText = function (ajax, response, status) {
+      // Implement a scoped quickeditCKEditorGetUntransformedText AJAX command:
+      // calls the callback.
+      textLoaderAjax.commands.quickeditCKEditorGetUntransformedText = function (ajax, response, status) {
         callback(response.data);
       };
 
-      // This will ensure our scoped editGetUntransformedText AJAX command
+      // This will ensure our scoped quickeditGetUntransformedText AJAX command
       // gets called.
-      this.$el.trigger('edit-internal.edit-ckeditor');
+      this.$el.trigger('quickedit-internal.quickedit-ckeditor');
     },
 
     // @see Drupal 8's Drupal.editors.ckeditor.attachInlineEditor().
@@ -269,4 +269,4 @@
 
   });
 
-})(jQuery, _, Drupal, Drupal.settings, Drupal.edit.util.debounce);
+})(jQuery, _, Drupal, Drupal.settings, Drupal.quickedit.util.debounce);

@@ -5,7 +5,7 @@
   /**
    * State of an in-place editable entity in the DOM.
    */
-  Drupal.edit.EntityModel = Drupal.edit.BaseModel.extend({
+  Drupal.quickedit.EntityModel = Drupal.quickedit.BaseModel.extend({
 
     defaults: {
       // The DOM element that represents this entity. It may seem bizarre to
@@ -22,7 +22,7 @@
       id: null,
       // The label of the entity.
       label: null,
-      // A Drupal.edit.FieldCollection for all fields of this entity.
+      // A Drupal.quickedit.FieldCollection for all fields of this entity.
       fields: null,
 
       // The attributes below are stateful. The ones above will never change
@@ -57,7 +57,7 @@
      * {@inheritdoc}
      */
     initialize: function () {
-      this.set('fields', new Drupal.edit.FieldCollection());
+      this.set('fields', new Drupal.quickedit.FieldCollection());
 
       // Respond to entity state changes.
       this.listenTo(this, 'change:state', this.stateChange);
@@ -66,16 +66,16 @@
       // fields.
       this.listenTo(this.get('fields'), 'change:state', this.fieldStateChange);
 
-      // Call Drupal.edit.BaseModel's initialize() method.
-      Drupal.edit.BaseModel.prototype.initialize.call(this);
+      // Call Drupal.quickedit.BaseModel's initialize() method.
+      Drupal.quickedit.BaseModel.prototype.initialize.call(this);
     },
 
     /**
      * Updates FieldModels' states when an EntityModel change occurs.
      *
-     * @param Drupal.edit.EntityModel entityModel
+     * @param Drupal.quickedit.EntityModel entityModel
      * @param String state
-     *   The state of the associated entity. One of Drupal.edit.EntityModel.states.
+     *   The state of the associated entity. One of Drupal.quickedit.EntityModel.states.
      * @param Object options
      */
     stateChange: function (entityModel, state, options) {
@@ -119,7 +119,7 @@
           // stored in TempStore.
           fields.chain()
             .filter(function (fieldModel) {
-              return _.intersection([fieldModel.get('state')], Drupal.edit.app.changedFieldStates).length;
+              return _.intersection([fieldModel.get('state')], Drupal.quickedit.app.changedFieldStates).length;
             })
             .each(function (fieldModel) {
               fieldModel.set('state', 'saving');
@@ -146,7 +146,7 @@
             this.set('state', 'opened', {confirming: true});
             // An action in reaction to state change must be deferred.
             _.defer(function () {
-              Drupal.edit.app.confirmEntityDeactivation(entityModel);
+              Drupal.quickedit.app.confirmEntityDeactivation(entityModel);
             });
           }
           else {
@@ -191,9 +191,9 @@
      *
      * Helper function.
      *
-     * @param Drupal.edit.EntityModel entityModel
+     * @param Drupal.quickedit.EntityModel entityModel
      *   The model of the entity for which a field's state attribute has changed.
-     * @param Drupal.edit.FieldModel fieldModel
+     * @param Drupal.quickedit.FieldModel fieldModel
      *   The model of the field whose state attribute has changed.
      *
      * @see fieldStateChange()
@@ -228,10 +228,10 @@
     /**
      * Reacts to state changes in this entity's fields.
      *
-     * @param Drupal.edit.FieldModel fieldModel
+     * @param Drupal.quickedit.FieldModel fieldModel
      *   The model of the field whose state attribute changed.
      * @param String state
-     *   The state of the associated field. One of Drupal.edit.FieldModel.states.
+     *   The state of the associated field. One of Drupal.quickedit.FieldModel.states.
      */
     fieldStateChange: function (fieldModel, state) {
       var entityModel = this;
@@ -260,7 +260,7 @@
           // A state change in reaction to another state change must be deferred.
           _.defer(function () {
             entityModel.set('state', 'opened', {
-              'accept-field-states': Drupal.edit.app.readyFieldStates
+              'accept-field-states': Drupal.quickedit.app.readyFieldStates
             });
           });
           break;
@@ -298,7 +298,7 @@
           // Attempt to save the entity. If the entity's fields are not yet all in
           // a ready state, the save will not be processed.
           var options = {
-            'accept-field-states': Drupal.edit.app.readyFieldStates
+            'accept-field-states': Drupal.quickedit.app.readyFieldStates
           };
           if (entityModel.set('isCommitting', true, options)) {
             entityModel.save({
@@ -316,7 +316,7 @@
                 entityModel.set('state', 'opened', { reason: 'networkerror' });
                 // Show a modal to inform the user of the network error.
                 var message = Drupal.t('Your changes to <q>@entity-title</q> could not be saved, either due to a website problem or a network connection problem.<br>Please try again.', { '@entity-title' : entityModel.get('label') });
-                Drupal.edit.util.networkErrorModal(Drupal.t('Sorry!'), message);
+                Drupal.quickedit.util.networkErrorModal(Drupal.t('Sorry!'), message);
               }
             });
           }
@@ -328,7 +328,7 @@
           // A state change in reaction to another state change must be deferred.
           _.defer(function() {
             entityModel.set('state', 'closing', {
-              'accept-field-states': Drupal.edit.app.readyFieldStates
+              'accept-field-states': Drupal.quickedit.app.readyFieldStates
             });
           });
           break;
@@ -359,17 +359,17 @@
 
       // @todo Simplify this once https://drupal.org/node/1533366 lands.
       // @see https://drupal.org/node/2029999.
-      var id = 'edit-save-entity';
+      var id = 'quickedit-save-entity';
       // Create a temporary element to be able to use Drupal.ajax.
-      var $el = $('#edit-entity-toolbar').find('.action-save'); // This is the span element inside the button.
+      var $el = $('#quickedit-entity-toolbar').find('.action-save'); // This is the span element inside the button.
       // Create a Drupal.ajax instance to save the entity.
       var entitySaverAjax = new Drupal.ajax(id, $el, {
-        url: Drupal.edit.util.buildUrl(entityModel.get('entityID'), drupalSettings.edit.entitySaveURL),
-        event: 'edit-save.edit',
+        url: Drupal.quickedit.util.buildUrl(entityModel.get('entityID'), drupalSettings.quickedit.entitySaveURL),
+        event: 'quickedit-save.quickedit',
         progress: { type: 'none' },
         error: function () {
-          $el.off('edit-save.edit');
-          // Let the Drupal.edit.EntityModel Backbone model's error() method
+          $el.off('quickedit-save.quickedit');
+          // Let the Drupal.quickedit.EntityModel Backbone model's error() method
           // handle errors.
           options.error.call(entityModel);
         }
@@ -377,9 +377,9 @@
       // Work-around for https://drupal.org/node/2019481 in Drupal 7.
       entitySaverAjax.commands = {};
       // Entity saved successfully.
-      entitySaverAjax.commands.editEntitySaved = function(ajax, response, status) {
+      entitySaverAjax.commands.quickeditEntitySaved = function(ajax, response, status) {
         // Clean up.
-        $(ajax.element).off('edit-save.edit');
+        $(ajax.element).off('quickedit-save.quickedit');
         // All fields have been moved from TempStore to permanent storage, update
         // the "inTempStore" attribute on FieldModels, on the EntityModel and
         // clear EntityModel's "fieldInTempStore" attribute.
@@ -394,9 +394,9 @@
           options.success.call(entityModel);
         }
       };
-      // Trigger the AJAX request, which will will return the editEntitySaved AJAX
+      // Trigger the AJAX request, which will will return the quickeditEntitySaved AJAX
       // command to which we then react.
-      $el.trigger('edit-save.edit');
+      $el.trigger('quickedit-save.quickedit');
     },
 
     /**
@@ -514,7 +514,7 @@
      * {@inheritdoc}
      */
     destroy: function (options) {
-      Drupal.edit.BaseModel.prototype.destroy.call(this, options);
+      Drupal.quickedit.BaseModel.prototype.destroy.call(this, options);
 
       this.stopListening();
 
@@ -594,9 +594,9 @@
      * Indicates whether the 'from' state comes before the 'to' state.
      *
      * @param String from
-     *   One of Drupal.edit.EntityModel.states.
+     *   One of Drupal.quickedit.EntityModel.states.
      * @param String to
-     *   One of Drupal.edit.EntityModel.states.
+     *   One of Drupal.quickedit.EntityModel.states.
      * @return Boolean
      */
     followsStateSequence: function (from, to) {
@@ -605,8 +605,8 @@
 
   });
 
-  Drupal.edit.EntityCollection = Backbone.Collection.extend({
-    model: Drupal.edit.EntityModel
+  Drupal.quickedit.EntityCollection = Backbone.Collection.extend({
+    model: Drupal.quickedit.EntityModel
   });
 
 }(_, jQuery, Backbone, Drupal, Drupal.settings));

@@ -6,7 +6,7 @@
 
   "use strict";
 
-  Drupal.edit.EntityToolbarView = Backbone.View.extend({
+  Drupal.quickedit.EntityToolbarView = Backbone.View.extend({
 
     _fieldToolbarRoot: null,
 
@@ -36,11 +36,11 @@
 
       // Reposition the entity toolbar as the viewport and the position within the
       // viewport changes.
-      $(window).on('resize.edit scroll.edit', debounce($.proxy(this.windowChangeHandler, this), 150));
+      $(window).on('resize.quickedit scroll.quickedit', debounce($.proxy(this.windowChangeHandler, this), 150));
 
       // Adjust the fence placement within which the entity toolbar may be
       // positioned.
-      $(document).on('drupalViewportOffsetChange.edit', function (event, offsets) {
+      $(document).on('drupalViewportOffsetChange.quickedit', function (event, offsets) {
         if (that.$fence) {
           that.$fence.css(offsets);
         }
@@ -49,7 +49,7 @@
       // Set the entity toolbar DOM element as the el for this view.
       var $toolbar = this.buildToolbarEl();
       this.setElement($toolbar);
-      this._fieldToolbarRoot = $toolbar.find('.edit-toolbar-field').get(0);
+      this._fieldToolbarRoot = $toolbar.find('.quickedit-toolbar-field').get(0);
 
       // Initial render.
       this.render();
@@ -62,13 +62,13 @@
       if (this.model.get('isActive')) {
         // If the toolbar container doesn't exist, create it.
         var $body = $('body');
-        if ($body.children('#edit-entity-toolbar').length === 0) {
+        if ($body.children('#quickedit-entity-toolbar').length === 0) {
           $body.append(this.$el);
         }
         // The fence will define a area on the screen that the entity toolbar
         // will be position within.
-        if ($body.children('#edit-toolbar-fence').length === 0) {
-          this.$fence = $(Drupal.theme('editEntityToolbarFence'))
+        if ($body.children('#quickedit-toolbar-fence').length === 0) {
+          this.$fence = $(Drupal.theme('quickeditEntityToolbarFence'))
             // @todo: Figure out the Drupal 7 alternative for Drupal.displace()?
             //        See https://drupal.org/node/1956804.
             //.css(Drupal.displace())
@@ -85,7 +85,7 @@
       }
 
       // The save button text and state varies with the state of the entity model.
-      var $button = this.$el.find('.edit-button.action-save');
+      var $button = this.$el.find('.quickedit-button.action-save');
       var isDirty = this.model.get('isDirty');
       // Adjust the save button according to the state of the model.
       switch (this.model.get('state')) {
@@ -122,8 +122,8 @@
       this.$fence.remove();
 
       // Stop listening to DOM events.
-      $(window).off('resize.edit scroll.edit');
-      $(document).off('drupalViewportOffsetChange.edit');
+      $(window).off('resize.quickedit scroll.quickedit');
+      $(document).off('drupalViewportOffsetChange.quickedit');
 
       Backbone.View.prototype.remove.call(this);
     },
@@ -140,9 +140,9 @@
     /**
      * Determines the actions to take given a change of state.
      *
-     * @param Drupal.edit.FieldModel model
+     * @param Drupal.quickedit.FieldModel model
      * @param String state
-     *   The state of the associated field. One of Drupal.edit.FieldModel.states.
+     *   The state of the associated field. One of Drupal.quickedit.FieldModel.states.
      */
     fieldStateChange: function (model, state) {
       switch (state) {
@@ -187,19 +187,19 @@
             break;
           case 1:
             // Position against a form container.
-            activeField = Drupal.edit.app.model.get('activeField');
-            of = activeField && activeField.editorView && activeField.editorView.$formContainer && activeField.editorView.$formContainer.find('.edit-form');
+            activeField = Drupal.quickedit.app.model.get('activeField');
+            of = activeField && activeField.editorView && activeField.editorView.$formContainer && activeField.editorView.$formContainer.find('.quickedit-form');
             break;
           case 2:
             // Position against an active field.
             of = activeField && activeField.editorView && activeField.editorView.getEditedElement();
-            if (activeField && activeField.editorView && activeField.editorView.getEditUISettings().padding) {
+            if (activeField && activeField.editorView && activeField.editorView.getQuickEditUISettings().padding) {
               horizontalPadding = 5;
             }
             break;
           case 3:
             // Position against a highlighted field.
-            highlightedField = Drupal.edit.app.model.get('highlightedField');
+            highlightedField = Drupal.quickedit.app.model.get('highlightedField');
             of = highlightedField && highlightedField.editorView && highlightedField.editorView.getEditedElement();
             delay = 250;
             break;
@@ -235,13 +235,13 @@
       function refinePosition (view, suggested, info) {
         // Determine if the pointer should be on the top or bottom.
         var isBelow = suggested.top > info.target.top;
-        info.element.element.toggleClass('edit-toolbar-pointer-top', isBelow);
+        info.element.element.toggleClass('quickedit-toolbar-pointer-top', isBelow);
         // Don't position the toolbar past the first or last editable field if
         // the entity is the target.
         if (view.$entity[0] === info.target.element[0]) {
           // Get the first or last field according to whether the toolbar is above
           // or below the entity.
-          var $field = view.$entity.find('.edit-editable').eq((isBelow) ? -1 : 0);
+          var $field = view.$entity.find('.quickedit-editable').eq((isBelow) ? -1 : 0);
           if ($field.length > 0) {
             suggested.top = (isBelow) ? ($field.offset().top + $field.outerHeight(true)) : $field.offset().top - info.element.element.outerHeight(true);
           }
@@ -269,7 +269,7 @@
       function positionToolbar () {
         that.$el
           // @see js/ducktape.position.js: modified version of jQuery UI Position!
-          .position_edit({
+          .position_quickedit({
             my: edge + ' bottom',
             // Move the toolbar 1px towards the start edge of the 'of' element,
             // plus any horizontal padding that may have been added to the element
@@ -341,27 +341,27 @@
      * Builds the entity toolbar HTML; attaches to DOM; sets starting position.
      */
     buildToolbarEl: function () {
-      var $toolbar = $(Drupal.theme('editEntityToolbar', {
-        id: 'edit-entity-toolbar'
+      var $toolbar = $(Drupal.theme('quickeditEntityToolbar', {
+        id: 'quickedit-entity-toolbar'
       }));
 
       $toolbar
-        .find('.edit-toolbar-entity')
+        .find('.quickedit-toolbar-entity')
         // Append the "ops" toolgroup into the toolbar.
-        .prepend(Drupal.theme('editToolgroup', {
+        .prepend(Drupal.theme('quickeditToolgroup', {
           classes: ['ops'],
           buttons: [
             {
               label: Drupal.t('Save'),
               type: 'submit',
-              classes: 'action-save edit-button icon',
+              classes: 'action-save quickedit-button icon',
               attributes: {
                 'aria-hidden': true
               }
             },
             {
               label: Drupal.t('Close'),
-              classes: 'action-cancel edit-button icon icon-close icon-only'
+              classes: 'action-cancel quickedit-button icon icon-close icon-only'
             }
           ]
         }));
@@ -396,20 +396,20 @@
       var entityLabel = this.model.get('label');
 
       // Label of an active field, if it exists.
-      var activeField = Drupal.edit.app.model.get('activeField');
+      var activeField = Drupal.quickedit.app.model.get('activeField');
       var activeFieldLabel = activeField && activeField.get('metadata').label;
       // Label of a highlighted field, if it exists.
-      var highlightedField = Drupal.edit.app.model.get('highlightedField');
+      var highlightedField = Drupal.quickedit.app.model.get('highlightedField');
       var highlightedFieldLabel = highlightedField && highlightedField.get('metadata').label;
       // The label is constructed in a priority order.
       if (activeFieldLabel) {
-        label = Drupal.theme('editEntityToolbarLabel', {
+        label = Drupal.theme('quickeditEntityToolbarLabel', {
           entityLabel: entityLabel,
           fieldLabel: activeFieldLabel
         });
       }
       else if (highlightedFieldLabel) {
-        label = Drupal.theme('editEntityToolbarLabel', {
+        label = Drupal.theme('quickeditEntityToolbarLabel', {
           entityLabel: entityLabel,
           fieldLabel: highlightedFieldLabel
         });
@@ -419,7 +419,7 @@
       }
 
       this.$el
-        .find('.edit-toolbar-label')
+        .find('.quickedit-toolbar-label')
         .html(label);
     },
 
@@ -458,7 +458,7 @@
      *   The toolgroup DOM element.
      */
     _find: function (toolgroup) {
-      return this.$el.find('.edit-toolbar .edit-toolgroup.' + toolgroup);
+      return this.$el.find('.quickedit-toolbar .quickedit-toolgroup.' + toolgroup);
     },
 
     /**
@@ -468,9 +468,9 @@
      *   A toolgroup name.
      */
     show: function (toolgroup) {
-      this.$el.removeClass('edit-animate-invisible');
+      this.$el.removeClass('quickedit-animate-invisible');
     }
 
   });
 
-})(jQuery, _, Backbone, Drupal, Drupal.edit.util.debounce);
+})(jQuery, _, Backbone, Drupal, Drupal.quickedit.util.debounce);
