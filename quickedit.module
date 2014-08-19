@@ -96,6 +96,15 @@ function quickedit_page_build(&$page) {
   if (path_is_admin(current_path())) {
     return;
   }
+  // But sadly, path_is_admin() in Drupal 7 will say node/*/edit is not an admin
+  // path if the "Use the administration theme when editing or creating content"
+  // setting is unchecked. So we need to add this silly check to ensure in-place
+  // editing is not triggered on node admin paths.
+  // @see https://www.drupal.org/node/2264607
+  // @see https://www.drupal.org/node/2139341
+  elseif (!empty($page['content']['system_main']['#node_edit_form'])) {
+    return;
+  }
 
   // Incredibly ugly hack to support Panelizer overrides using Page Manager.
   // @see includes/panelizer.inc/quickedit_ctools_render_alter()
