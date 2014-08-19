@@ -77,7 +77,7 @@ function quickedit_preprocess_panelizer_view_mode(&$variables) {
 function _panelizer_generate_quickedit_viewmode($entity) {
   // Ensure Panelizer view mode property exists.
   if (!isset($entity->panelizer_view_mode)) {
-    return;
+    return '0';
   }
 
   // @see includes/panelizer.inc/panelizer_panelizer_pre_render_alter()
