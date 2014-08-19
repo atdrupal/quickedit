@@ -565,7 +565,7 @@
 
     $context.find('[data-quickedit-field-id]').addBack('[data-quickedit-field-id]').each(function (index, fieldElement) {
       // Delete field models.
-      Drupal.edit.collections.fields.chain()
+      Drupal.quickedit.collections.fields.chain()
         .filter(function (fieldModel) { return fieldModel.get('el') === fieldElement; })
         .invoke('destroy');
 
