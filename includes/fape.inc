@@ -62,7 +62,16 @@ function quickedit_field_edit_form_validate($form, &$form_state) {
  * @see \Drupal\quickedit\Form\EditFieldForm::submit() in Drupal 8.
  */
 function quickedit_field_edit_form_submit(&$form, &$form_state) {
+  $entity_type = $form_state['entity_type'];
+  $field_name = $form_state['field_name'];
+  $langcode = $form_state['langcode'];
+
   $entity = _quickedit_build_entity($form, $form_state);
+  foreach (field_get_items($entity_type, $entity, $field_name) as $i => $item) {
+    if (isset($item['fid']) && empty($item['uri'])) {
+      $entity->{$field_name}[$langcode][$i] = (array) file_load($item['fid']);
+    }
+  }
 
   _quickedit_entity_save_to_tempstore($form_state['entity_type'], $form_state['entity_id'], $entity);
 }
